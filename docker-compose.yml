@@ -1,17 +1,19 @@
 version: "3.9"
-
+networks:
+  hagovusqueda:
+    external: false
 services:
   db:
     image: postgres:16
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: appdb
+    env_file:
+      - .env
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - hagovusqueda
 
   api:
     build: .
@@ -25,6 +27,19 @@ services:
       - .env
     depends_on:
       - db
+    networks:
+      - hagovusqueda
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - hagovusqueda
 
 volumes:
   db_data:
