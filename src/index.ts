@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import prisma from "./db";
+import cors from "@fastify/cors";
 
 const fastify = Fastify({ logger: true });
 
@@ -50,6 +51,9 @@ fastify.post("/videos/:id/subtitles", async (req: any) => {
 
 const start = async () => {
   try {
+    await fastify.register(cors, {
+      origin: "*",
+    });
     await fastify.listen({ port: 3001, host: "0.0.0.0" });
     console.log("Server running on http://localhost:3000");
   } catch (err) {
