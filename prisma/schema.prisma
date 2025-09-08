@@ -14,5 +14,19 @@ datasource db {
 }
 
 model YoutubeVideo {
-  id      String      @id
+  id        String     @id
+  title     String
+  show      String
+  duration  Int
+  date      DateTime
+  subtitles Subtitle[] // relation
+}
+
+model Subtitle {
+  id        Int          @id @default(autoincrement())
+  startTime Int          // in milliseconds or seconds (pick one and stay consistent)
+  endTime   Int
+  text      String
+  video     YoutubeVideo @relation(fields: [videoId], references: [id])
+  videoId   String       // foreign key to YoutubeVideo.id
 }
