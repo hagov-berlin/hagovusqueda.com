@@ -1,12 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { request, getWholePlaylist } from "./utils/youtube-api-client";
 
-const prisma = new PrismaClient();
-
 const channelId = "UC6pJGaMdx5Ter_8zYbLoRgA"; // Blender Channel ID
 const blenderPlaylist = channelId.replace(/^UC/, "UU");
 
-async function main() {
+export async function importBlenderYoutubeVideos(prisma: PrismaClient) {
   const { videos } = await request(blenderPlaylist);
 
   for (const video of videos) {
@@ -24,7 +22,3 @@ async function main() {
     });
   }
 }
-
-main()
-  .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());

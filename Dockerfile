@@ -14,6 +14,8 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+RUN apk add yt-dlp
+
 # Expose Fastify port
 EXPOSE 3001
 
