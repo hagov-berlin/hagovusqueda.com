@@ -7,7 +7,8 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "import-data": "ts-node scripts/import-blender-youtube.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@prisma/client": "^6.15.0",
+    "dotenv": "^17.2.2",
     "fastify": "^5.6.0"
   }
 }
