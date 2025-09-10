@@ -63,9 +63,12 @@ function removeUnimportantSubtitles(subtitles: Subtitle[], indexesOriginal: numb
         accumIndex += subtitle.text.length + 1;
         if (accumIndex > targetIndex) {
           weWantThisSubtitle = true;
-          if (videoIndexes.length > 0) {
+
+          while (accumIndex > targetIndex && videoIndexes.length > 0) {
+            console.log({ accumIndex, targetIndex });
             targetIndex = videoIndexes.shift();
-          } else {
+          }
+          if (accumIndex > targetIndex && videoIndexes.length == 0) {
             targetIndex = -1;
           }
         }
@@ -101,6 +104,7 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
     const videoIndexes = results.find((result) => result.id === video.id)?.indexes || [];
     return {
       ...video,
+      videoIndexes,
       subtitles: removeUnimportantSubtitles(video.subtitles, videoIndexes),
     };
   });
