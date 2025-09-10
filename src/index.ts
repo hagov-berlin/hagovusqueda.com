@@ -1,53 +1,27 @@
 import Fastify from "fastify";
 import prisma from "./db";
 import cors from "@fastify/cors";
+import { videos, video } from "./video";
+import search from "./search";
 
 const fastify = Fastify({ logger: true });
 
-// Health check
-fastify.get("/health", async () => {
-  return { ok: true };
-});
+fastify.get("/", () => ({ msg: "api.hagovusqueda.com" }));
 
-// Example DB check
+fastify.get("/health", () => ({ ok: true }));
+
 fastify.get("/db-check", async () => {
   const result = await prisma.$queryRaw`SELECT 1 as alive`;
   return result;
 });
 
-fastify.get("/videos", async () => {
-  return await prisma.youtubeVideo.findMany();
-});
+fastify.get("/favicon.ico", (req, res) => res.status(204)); // TODO
 
-fastify.post("/videos", async (req: any) => {
-  const { id, title, show, duration, date } = req.body;
-  return await prisma.youtubeVideo.create({
-    data: { id, title, show, duration, date: new Date(date) },
-  });
-});
+fastify.get("/videos", videos);
 
-// Get a video with subtitles
-fastify.get("/videos/:id", async (req: any) => {
-  const { id } = req.params;
-  return await prisma.youtubeVideo.findUnique({
-    where: { id },
-    include: { subtitles: true },
-  });
-});
+fastify.get("/videos/:id", video);
 
-// Add a subtitle to a video
-fastify.post("/videos/:id/subtitles", async (req: any) => {
-  const { id } = req.params;
-  const { startTime, endTime, text } = req.body;
-  return await prisma.subtitle.create({
-    data: {
-      startTime,
-      endTime,
-      text,
-      videoId: id,
-    },
-  });
-});
+fastify.get("/search", search);
 
 const start = async () => {
   try {

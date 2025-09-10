@@ -51,11 +51,21 @@ export async function getSubtitlesForVideo(videoId: string): Promise<Subtitle[]>
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     const command = `yt-dlp "${videoUrl}" --skip-download --write-auto-sub --sub-lang "es" --sub-format srt --output "${outputPath}"`;
     console.log(`Downloading subtitles for ${videoId}`);
-    const { stdout, stderr } = await execPromise(command);
-    console.log(stdout);
-    console.error(stderr);
+    try {
+      const { stdout, stderr } = await execPromise(command);
+      console.log(stdout);
+      console.error(stderr);
+    } catch (error) {
+      console.error("Error downloading subtitles for", videoId);
+      console.error(error);
+      return [];
+    }
   }
 
+  if (!fs.existsSync(outputPathWithExtension)) {
+    console.error("Failed downloading subtitles for", videoId);
+    return [];
+  }
   const subtitleString = fs.readFileSync(outputPathWithExtension).toString();
 
   console.log(`Converting raw subtitle to JSON for video ${videoId}`);

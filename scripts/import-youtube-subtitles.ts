@@ -17,9 +17,28 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
       },
     });
 
-    if (subtitleCount === 0) {
+    const missingTranscript = !video.transcript || video.transcript.length === 0;
+    const missingSubtitles = subtitleCount === 0;
+    const shouldBeUpdated = missingTranscript || missingSubtitles;
+
+    if (!shouldBeUpdated) continue;
+
+    const subtitles = await getSubtitlesForVideo(video.id);
+
+    if (missingTranscript && subtitles.length > 0) {
+      console.log("Updating transcript", video.id);
+      await prisma.youtubeVideo.update({
+        where: {
+          id: video.id,
+        },
+        data: {
+          transcript: subtitles.map((subtitle) => subtitle[0]).join(" "),
+        },
+      });
+    }
+
+    if (missingSubtitles && subtitles.length > 0) {
       try {
-        const subtitles = await getSubtitlesForVideo(video.id);
         console.log(video.id, subtitles.length);
 
         for (const subtitle of subtitles) {
