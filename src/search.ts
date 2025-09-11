@@ -1,10 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import prisma from "./db";
 import { Subtitle, YoutubeVideo } from "@prisma/client";
+import { parseQuery } from "./utils";
 
-async function getVideosAndTranscriptIndexes(req: FastifyRequest, options: { limit: number }) {
-  const query = req.query as Record<string, string>;
-  const { show, q } = query;
+async function getVideosAndTranscriptIndexes(q: string, show: string, options: { limit: number }) {
   let sqlQuery = `
     SELECT v.id, ts_headline(
       'spanish',
@@ -79,13 +78,13 @@ function removeUnimportantSubtitles(subtitles: Subtitle[], indexesOriginal: numb
 }
 
 export default async function search(req: FastifyRequest, reply: FastifyReply) {
-  const query = req.query as Record<string, string>;
+  const { q, show } = parseQuery(req);
 
-  if (!query.q) {
+  if (!q) {
     return reply.status(400).send({ error: "Missing query param 'q'" });
   }
 
-  const results = await getVideosAndTranscriptIndexes(req, { limit: 50 });
+  const results = await getVideosAndTranscriptIndexes(q, show, { limit: 50 });
   const videoIds = results.map((result) => result.id);
 
   const fullVideos = await prisma.youtubeVideo.findMany({
@@ -108,7 +107,7 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
     };
   });
 
-  req.log.info({ msg: "Search", q: query.q, show: query.show, resultsLength: results.length });
+  req.log.info({ msg: "Search", q, show, resultsLength: results.length });
 
   return { results: videosWithTheRightSubtitles, resultsCapped: false };
 }

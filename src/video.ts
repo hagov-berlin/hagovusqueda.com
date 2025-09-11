@@ -1,16 +1,13 @@
 import { Prisma } from "@prisma/client";
 import prisma from "./db";
 import { FastifyRequest } from "fastify";
+import { parseQuery } from "./utils";
 
 export async function videos(req: FastifyRequest) {
-  const query = req.query as Record<string, string>;
-  const pageString = query.page;
-  const page = pageString ? parseInt(pageString) : 1;
-
-  const showString = query.show;
+  const { page, show } = parseQuery(req);
   const filters: Prisma.YoutubeVideoWhereInput = {};
-  if (showString) {
-    filters.show = showString;
+  if (show) {
+    filters.show = show;
   }
 
   // TODO: Date filters
