@@ -8,7 +8,7 @@ export function parseQuery(req: FastifyRequest) {
   const page = pageString ? parseInt(pageString) : 1;
 
   let show: string[] = [];
-  if (showString && showString.indexOf(",") > -1) {
+  if (showString) {
     show = showString
       .split(",")
       .slice(0, 20)
