@@ -1,3 +1,4 @@
+import "newrelic";
 import Fastify from "fastify";
 import prisma from "./db";
 import cors from "@fastify/cors";

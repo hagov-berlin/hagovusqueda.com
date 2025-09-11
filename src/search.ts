@@ -108,5 +108,7 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
     };
   });
 
+  req.log.info({ msg: "Search", q: query.q, show: query.show, resultsLength: results.length });
+
   return { results: videosWithTheRightSubtitles, resultsCapped: false };
 }
