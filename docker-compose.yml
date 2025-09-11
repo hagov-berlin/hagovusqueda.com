@@ -22,9 +22,6 @@ services:
     command: npm run start
     ports:
       - "3001:3001"
-    volumes:
-      - .:/app
-      - /app/node_modules
     env_file:
       - .env
     networks:
