@@ -6,7 +6,7 @@ import search from "./search";
 
 const fastify = Fastify({ logger: true });
 
-fastify.get("/", () => ({ msg: "api.hagovusqueda.com" }));
+fastify.get("/", () => ({ msg: "api.hagovusqueda.com", link: "https://hagovusqueda.com" }));
 
 fastify.get("/health", () => ({ ok: true }));
 

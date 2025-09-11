@@ -14,10 +14,8 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+RUN npm run build  
+
 RUN apk add yt-dlp
 
-# Expose Fastify port
-EXPOSE 3001
-
-# Run app
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]

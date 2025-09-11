@@ -65,7 +65,6 @@ function removeUnimportantSubtitles(subtitles: Subtitle[], indexesOriginal: numb
           weWantThisSubtitle = true;
 
           while (accumIndex > targetIndex && videoIndexes.length > 0) {
-            console.log({ accumIndex, targetIndex });
             targetIndex = videoIndexes.shift();
           }
           if (accumIndex > targetIndex && videoIndexes.length == 0) {
