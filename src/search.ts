@@ -3,14 +3,9 @@ import prisma from "./db";
 import { Subtitle, YoutubeVideo } from "@prisma/client";
 import { parseQuery } from "./utils";
 
-async function getVideosAndTranscriptIndexes(q: string, show: string, options: { limit: number }) {
+async function getVideoIdsFromPostgresTextSearch(q: string, show: string[], limit: number = 1000) {
   let sqlQuery = `
-    SELECT v.id, ts_headline(
-      'spanish',
-      v.transcript,
-      plainto_tsquery('spanish', $1),
-      'StartSel=<mark>, StopSel=</mark>, MaxWords=1000000, MinWords=0, ShortWord=3, HighlightAll=TRUE'
-    ) as matches
+    SELECT v.id
     FROM "YoutubeVideo" v
     WHERE to_tsvector('spanish', v.transcript) @@ plainto_tsquery('spanish', $1)
   `;
@@ -18,76 +13,19 @@ async function getVideosAndTranscriptIndexes(q: string, show: string, options: {
   const params: [string, string[]?] = [q];
   let paramIndex = 2;
 
-  if (show) {
-    const shows = show
-      .split(",")
-      .slice(0, 20)
-      .map((s) => s.trim())
-      .filter((s) => s.length < 20);
+  if (show.length > 0) {
     sqlQuery += ` AND v.show = ANY($${paramIndex}::text[])`;
-    params.push(shows);
+    params.push(show);
     paramIndex++;
   }
-  sqlQuery += `LIMIT ${options.limit};`;
+  sqlQuery += `LIMIT ${limit};`;
 
-  const results: { id: string; matches: string }[] = await prisma.$queryRawUnsafe<any[]>(
-    sqlQuery,
-    ...params
-  );
-  return results.map((result) => {
-    const indexes: number[] = [];
-    let accumIndex = 0;
-    result.matches
-      .replace(/<\/mark>/g, "")
-      .split("<mark>")
-      .slice(0, -1)
-      .forEach((preMatch) => {
-        accumIndex += preMatch.length;
-        indexes.push(accumIndex);
-      });
-    return { id: result.id, indexes };
-  });
+  const results: { id: string }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
+  return results.map((result) => result.id);
 }
 
-function removeUnimportantSubtitles(subtitles: Subtitle[], indexesOriginal: number[]) {
-  const videoIndexes = [...indexesOriginal];
-  let accumIndex = 0;
-  let targetIndex = videoIndexes.shift();
-  const filteredSubtitles = subtitles
-    .sort((subA, subB) => subA.startTime - subB.startTime)
-    .filter((subtitle) => {
-      let weWantThisSubtitle = false;
-
-      if (targetIndex > -1) {
-        accumIndex += subtitle.text.length + 1;
-        if (accumIndex > targetIndex) {
-          weWantThisSubtitle = true;
-
-          while (accumIndex > targetIndex && videoIndexes.length > 0) {
-            targetIndex = videoIndexes.shift();
-          }
-          if (accumIndex > targetIndex && videoIndexes.length == 0) {
-            targetIndex = -1;
-          }
-        }
-      }
-
-      return weWantThisSubtitle;
-    });
-  return filteredSubtitles;
-}
-
-export default async function search(req: FastifyRequest, reply: FastifyReply) {
-  const { q, show } = parseQuery(req);
-
-  if (!q) {
-    return reply.status(400).send({ error: "Missing query param 'q'" });
-  }
-
-  const results = await getVideosAndTranscriptIndexes(q, show, { limit: 50 });
-  const videoIds = results.map((result) => result.id);
-
-  const fullVideos = await prisma.youtubeVideo.findMany({
+function getVideosWithSubtitles(videoIds: string[]) {
+  return prisma.youtubeVideo.findMany({
     where: {
       id: { in: videoIds },
     },
@@ -97,17 +35,73 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
     },
     orderBy: { date: "desc" },
   });
+}
 
-  const videosWithTheRightSubtitles = fullVideos.map((video) => {
-    const videoIndexes = results.find((result) => result.id === video.id)?.indexes || [];
-    return {
-      ...video,
-      videoIndexes,
-      subtitles: removeUnimportantSubtitles(video.subtitles, videoIndexes),
-    };
+function normalizeText(text: string, ignoreAccents: boolean) {
+  if (ignoreAccents) {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+  return text;
+}
+
+function buildRegex(q: string, ignoreAccents: boolean = true, matchWholeWords: boolean = false) {
+  const normalizedSearchTerm = normalizeText(q, ignoreAccents);
+  const regexString = matchWholeWords ? `\\b${normalizedSearchTerm}\\b` : normalizedSearchTerm;
+  const searchRegex = new RegExp(regexString, "i");
+  return function testRegex(textToTest: string) {
+    const normalizedTextToTest = normalizeText(textToTest, ignoreAccents);
+    return searchRegex.test(normalizedTextToTest);
+  };
+}
+
+type VideoWithSubtitles = Omit<YoutubeVideo, "transcript"> & {
+  subtitles: Subtitle[];
+};
+
+function filterSubtitles(subtitles: Subtitle[], textMatcher: (text: string) => boolean) {
+  const matches = subtitles.filter((subtitle, index) => {
+    const subtitleText = subtitle.text;
+    const subtitleMatches = textMatcher(subtitleText);
+    if (subtitleMatches) return true;
+
+    const nextSubtitleText = subtitles[index + 1]?.text;
+    if (!nextSubtitleText) return false;
+
+    const nextSubtitleMatches = textMatcher(nextSubtitleText);
+    if (nextSubtitleMatches) return false;
+
+    const thisAndNextSubtitleMatches = textMatcher(`${subtitleText} ${nextSubtitleText}`);
+    return thisAndNextSubtitleMatches;
   });
+  return matches;
+}
 
-  req.log.info({ msg: "Search", q, show, resultsLength: results.length });
+function filterVideos(videos: VideoWithSubtitles[], q: string) {
+  const textMatcher = buildRegex(q);
+  return videos
+    .map((video) => ({
+      ...video,
+      subtitles: filterSubtitles(video.subtitles, textMatcher),
+    }))
+    .filter((video) => video.subtitles.length > 0);
+}
 
-  return { results: videosWithTheRightSubtitles, resultsCapped: false };
+export default async function search(req: FastifyRequest, reply: FastifyReply) {
+  const { q, show } = parseQuery(req);
+
+  if (!q) {
+    return reply.status(400).send({ error: "Missing query param 'q'" });
+  }
+
+  const startTime = new Date().getTime();
+
+  const videoIds = await getVideoIdsFromPostgresTextSearch(q, show);
+  const fullVideos = await getVideosWithSubtitles(videoIds);
+  const results = filterVideos(fullVideos, q);
+  const subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
+
+  const ms = new Date().getTime() - startTime;
+  req.log.info({ msg: "Search", q, show, videoResults: results.length, subtitleResults, ms });
+
+  return { results, resultsCapped: false };
 }

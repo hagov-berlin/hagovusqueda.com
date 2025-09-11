@@ -6,8 +6,10 @@ import { parseQuery } from "./utils";
 export async function videos(req: FastifyRequest) {
   const { page, show } = parseQuery(req);
   const filters: Prisma.YoutubeVideoWhereInput = {};
-  if (show) {
-    filters.show = show;
+  if (show.length == 1) {
+    filters.show = show[0];
+  } else if (show.length > 1) {
+    filters.show = { in: show };
   }
 
   // TODO: Date filters
