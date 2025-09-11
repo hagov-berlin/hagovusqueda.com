@@ -13,7 +13,6 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
   console.log(`Found ${videos.length} videos`);
 
   for (const video of videos) {
-    console.log(`Counting subtitles for ${video.id}`);
     const subtitleCount = await prisma.subtitle.count({
       where: {
         videoId: video.id,
@@ -23,7 +22,6 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
     const missingTranscript = !video.transcript || video.transcript.length === 0;
     const missingSubtitles = subtitleCount === 0;
     const shouldBeUpdated = missingTranscript || missingSubtitles;
-    console.log({ missingSubtitles, missingTranscript, shouldBeUpdated });
 
     if (!shouldBeUpdated) continue;
 

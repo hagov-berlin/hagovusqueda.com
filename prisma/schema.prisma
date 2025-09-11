@@ -22,6 +22,9 @@ model YoutubeVideo {
   date       DateTime
   subtitles  Subtitle[] // relation
   transcript String?
+
+  @@index([show])
+  @@index([date])
 }
 
 model Subtitle {
