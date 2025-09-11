@@ -30,5 +30,7 @@ model Subtitle {
   endTime   Int
   text      String
   video     YoutubeVideo @relation(fields: [videoId], references: [id])
-  videoId   String // foreign key to YoutubeVideo.id
+  videoId   String
+
+  @@index([videoId])
 }
