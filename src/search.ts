@@ -86,6 +86,13 @@ function filterVideos(videos: VideoWithSubtitles[], q: string) {
     .filter((video) => video.subtitles.length > 0);
 }
 
+function splitIntoChunks<T>(list: T[], chunkSize: number = 50): T[][] {
+  const output: T[][] = [];
+  for (let i = 0, len = list.length; i < len; i += chunkSize)
+    output.push(list.slice(i, i + chunkSize));
+  return output;
+}
+
 export default async function search(req: FastifyRequest, reply: FastifyReply) {
   const { q, show } = parseQuery(req);
 
@@ -96,9 +103,17 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
   const startTime = new Date().getTime();
 
   const videoIds = await getVideoIdsFromPostgresTextSearch(q, show);
-  const fullVideos = await getVideosWithSubtitles(videoIds);
-  const results = filterVideos(fullVideos, q);
-  const subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
+  let results: VideoWithSubtitles[] = [];
+  let subtitleResults = 0;
+  for (const videoIdsChunk of splitIntoChunks(videoIds)) {
+    const fullVideos = await getVideosWithSubtitles(videoIdsChunk);
+    const newResults = filterVideos(fullVideos, q);
+    results = [...results, ...newResults];
+    subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
+    if (subtitleResults > 1000) {
+      break;
+    }
+  }
 
   const ms = new Date().getTime() - startTime;
   req.log.info({ msg: "Search", q, show, videoResults: results.length, subtitleResults, ms });
