@@ -105,12 +105,14 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
   const videoIds = await getVideoIdsFromPostgresTextSearch(q, show);
   let results: VideoWithSubtitles[] = [];
   let subtitleResults = 0;
+  let resultsCapped = false;
   for (const videoIdsChunk of splitIntoChunks(videoIds)) {
     const fullVideos = await getVideosWithSubtitles(videoIdsChunk);
     const newResults = filterVideos(fullVideos, q);
     results = [...results, ...newResults];
     subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
-    if (subtitleResults > 1000) {
+    if (results.length > 100 || subtitleResults > 1000) {
+      resultsCapped = true;
       break;
     }
   }
@@ -118,5 +120,5 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
   const ms = new Date().getTime() - startTime;
   req.log.info({ msg: "Search", q, show, videoResults: results.length, subtitleResults, ms });
 
-  return { results, resultsCapped: false };
+  return { results, resultsCapped };
 }
