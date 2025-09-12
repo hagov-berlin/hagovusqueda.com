@@ -7,12 +7,13 @@ const execPromise = util.promisify(exec);
 
 function timeToSeconds(rawTimeString: string) {
   if (!rawTimeString.includes(",")) throw new Error(`Cannot parse "${rawTimeString}"`);
-  const [timeString] = rawTimeString.split(",");
+  const [timeString, millisecondsString] = rawTimeString.split(",");
   const [hoursString, minutesString, secondsString] = timeString.split(":");
+  const milliseconds = parseInt(millisecondsString, 10);
   const hours = parseInt(hoursString, 10);
   const minutes = parseInt(minutesString, 10);
   const seconds = parseInt(secondsString, 10);
-  return seconds + minutes * 60 + hours * 60 * 60;
+  return milliseconds + (seconds + minutes * 60 + hours * 60 * 60) * 1000;
 }
 
 const videosWithoutSubtitles = [
@@ -36,7 +37,10 @@ function convertSrtToArray(subtitleContent: string): Subtitle[] {
   return subtitleArray;
 }
 
-export async function getSubtitlesForVideo(videoId: string): Promise<Subtitle[]> {
+export async function getSubtitlesForVideo(
+  videoId: string,
+  deleteTmpFile: boolean = false
+): Promise<Subtitle[]> {
   if (videosWithoutSubtitles.includes(videoId)) {
     console.log(`Skipping subtitles for ${videoId}`);
     return [];
@@ -71,6 +75,8 @@ export async function getSubtitlesForVideo(videoId: string): Promise<Subtitle[]>
   console.log(`Converting raw subtitle to JSON for video ${videoId}`);
   const subtitleArray = convertSrtToArray(subtitleString);
 
-  fs.unlinkSync(outputPathWithExtension);
+  if (deleteTmpFile) {
+    fs.unlinkSync(outputPathWithExtension);
+  }
   return subtitleArray;
 }

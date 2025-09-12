@@ -7,9 +7,9 @@ export async function videos(req: FastifyRequest) {
   const { page, show } = parseQuery(req);
   const filters: Prisma.YoutubeVideoWhereInput = {};
   if (show.length == 1) {
-    filters.show = show[0];
+    filters.show.slug = show[0];
   } else if (show.length > 1) {
-    filters.show = { in: show };
+    filters.show.slug = { in: show };
   }
 
   // TODO: Date filters
@@ -17,18 +17,18 @@ export async function videos(req: FastifyRequest) {
   return prisma.youtubeVideo
     .paginate({
       where: {
-        NOT: {
-          show: null,
-        },
-        ...filters,
+        ignored: false,
       },
-      select: {
+      include: {
+        show: { select: { slug: true } },
+        channel: { select: { slug: true } },
+      },
+      omit: {
         id: true,
-        title: true,
-        show: true,
-        date: true,
-        duration: true,
-        transcript: false,
+        showId: true,
+        channelId: true,
+        transcript: true,
+        ignored: true,
       },
       orderBy: {
         date: "desc",
@@ -39,8 +39,18 @@ export async function videos(req: FastifyRequest) {
 
 export async function video(req: FastifyRequest) {
   const { id } = req.params as Record<string, string>;
-  return await prisma.youtubeVideo.findUnique({
-    where: { id },
-    include: { subtitles: true },
+  return await prisma.youtubeVideo.findFirst({
+    where: { youtubeId: id },
+    include: {
+      subtitles: { orderBy: { order: "asc" } },
+      show: { select: { name: true, slug: true } },
+      channel: { select: { name: true, slug: true } },
+    },
+    omit: {
+      id: true,
+      showId: true,
+      channelId: true,
+      ignored: true,
+    },
   });
 }

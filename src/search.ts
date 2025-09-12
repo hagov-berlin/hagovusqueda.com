@@ -3,35 +3,48 @@ import prisma from "./db";
 import { Subtitle, YoutubeVideo } from "@prisma/client";
 import { parseQuery } from "./utils";
 
-async function getVideoIdsFromPostgresTextSearch(q: string, show: string[], limit: number = 1000) {
+async function getVideoIdsFromPostgresTextSearch(
+  q: string,
+  showIds: number[],
+  limit: number = 1000
+) {
   let sqlQuery = `
-    SELECT v.id
+    SELECT v."youtubeId"
     FROM "YoutubeVideo" v
     WHERE to_tsvector('spanish', v.transcript) @@ plainto_tsquery('spanish', $1)
   `;
 
-  const params: [string, string[]?] = [q];
+  const params: [string, number[]?] = [q];
   let paramIndex = 2;
 
-  if (show.length > 0) {
-    sqlQuery += ` AND v.show = ANY($${paramIndex}::text[])`;
-    params.push(show);
+  if (showIds.length > 0) {
+    sqlQuery += ` AND v."showId" = ANY($${paramIndex}::int[])`;
+    params.push(showIds);
     paramIndex++;
+    console.log({ showIds });
   }
   sqlQuery += `LIMIT ${limit};`;
 
-  const results: { id: string }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
-  return results.map((result) => result.id);
+  const results: { youtubeId: string }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
+  return results.map((result) => result.youtubeId);
 }
 
 function getVideosWithSubtitles(videoIds: string[]) {
   return prisma.youtubeVideo.findMany({
     where: {
-      id: { in: videoIds },
+      youtubeId: { in: videoIds },
     },
-    include: { subtitles: true },
+    include: {
+      subtitles: { orderBy: { order: "asc" } },
+      show: { select: { name: true, slug: true } },
+      channel: { select: { name: true, slug: true } },
+    },
     omit: {
       transcript: true,
+      id: true,
+      showId: true,
+      channelId: true,
+      ignored: true,
     },
     orderBy: { date: "desc" },
   });
@@ -54,9 +67,7 @@ function buildRegex(q: string, ignoreAccents: boolean = true, matchWholeWords: b
   };
 }
 
-type VideoWithSubtitles = Omit<YoutubeVideo, "transcript"> & {
-  subtitles: Subtitle[];
-};
+type VideoWithSubtitles = Awaited<ReturnType<typeof getVideosWithSubtitles>>[number];
 
 function filterSubtitles(subtitles: Subtitle[], textMatcher: (text: string) => boolean) {
   const matches = subtitles.filter((subtitle, index) => {
@@ -94,7 +105,7 @@ function splitIntoChunks<T>(list: T[], chunkSize: number = 50): T[][] {
 }
 
 export default async function search(req: FastifyRequest, reply: FastifyReply) {
-  const { q, show } = parseQuery(req);
+  const { q, show: showSlugs } = parseQuery(req);
 
   if (!q) {
     return reply.status(400).send({ error: "Missing query param 'q'" });
@@ -102,7 +113,10 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
 
   const startTime = new Date().getTime();
 
-  const videoIds = await getVideoIdsFromPostgresTextSearch(q, show);
+  const shows = await prisma.show.findMany({ where: { slug: { in: showSlugs } } });
+  const showIds = shows.map((show) => show.id);
+
+  const videoIds = await getVideoIdsFromPostgresTextSearch(q, showIds);
   let results: VideoWithSubtitles[] = [];
   let subtitleResults = 0;
   let resultsCapped = false;
@@ -118,7 +132,14 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
   }
 
   const ms = new Date().getTime() - startTime;
-  req.log.info({ msg: "Search", q, show, videoResults: results.length, subtitleResults, ms });
+  req.log.info({
+    msg: "Search",
+    q,
+    show: showSlugs,
+    videoResults: results.length,
+    subtitleResults,
+    ms,
+  });
 
   return { results, resultsCapped };
 }

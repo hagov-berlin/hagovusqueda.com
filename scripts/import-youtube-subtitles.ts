@@ -4,9 +4,7 @@ import { getSubtitlesForVideo } from "./utils/youtube-subtitles-client";
 export async function importYoutubeSubtitles(prisma: PrismaClient) {
   const videos = await prisma.youtubeVideo.findMany({
     where: {
-      NOT: {
-        show: null,
-      },
+      ignored: false,
     },
   });
 
@@ -25,7 +23,7 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
 
     if (!shouldBeUpdated) continue;
 
-    const subtitles = await getSubtitlesForVideo(video.id);
+    const subtitles = await getSubtitlesForVideo(video.youtubeId);
 
     if (missingTranscript && subtitles.length > 0) {
       console.log("Updating transcript", video.id);
@@ -43,16 +41,18 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
       try {
         console.log(video.id, subtitles.length);
 
-        for (const subtitle of subtitles) {
-          await prisma.subtitle.create({
-            data: {
-              text: subtitle[0],
-              startTime: subtitle[1],
-              endTime: subtitle[2],
-              videoId: video.id,
-            },
-          });
-        }
+        const data = subtitles.map((subtitle, index) => {
+          return {
+            text: subtitle[0],
+            startTimeMs: subtitle[1],
+            endTimeMs: subtitle[2],
+            videoId: video.id,
+            order: index,
+          };
+        });
+        await prisma.subtitle.createMany({
+          data,
+        });
       } catch (error) {
         console.error(error);
       }

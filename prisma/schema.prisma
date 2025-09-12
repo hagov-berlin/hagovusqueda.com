@@ -14,27 +14,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model YoutubeVideo {
-  id         String     @id
-  title      String
-  show       String?
-  duration   Int
-  date       DateTime
-  subtitles  Subtitle[] // relation
-  transcript String?
-  ignored    Boolean?
+model YoutubeChannel {
+  id        Int               @id @default(autoincrement())
+  name      String
+  slug      String
+  youtubeId String
+  shows     Show[]
+  playlists YoutubePlaylist[]
+  videos    YoutubeVideo[]
 
-  @@index([show])
+  @@unique([youtubeId])
+  @@index([slug])
+}
+
+model Show {
+  id        Int               @id @default(autoincrement())
+  name      String
+  slug      String
+  channelId Int
+  channel   YoutubeChannel    @relation(fields: [channelId], references: [id])
+  playlists YoutubePlaylist[]
+  videos    YoutubeVideo[]
+
+  @@index([slug])
+  @@index([channelId])
+}
+
+model YoutubePlaylist {
+  id        Int             @id @default(autoincrement())
+  youtubeId String
+  showId    Int?
+  show      Show?           @relation(fields: [showId], references: [id])
+  channelId Int?
+  channel   YoutubeChannel? @relation(fields: [channelId], references: [id])
+
+  @@unique([youtubeId])
+}
+
+model YoutubeVideo {
+  id          Int             @id @default(autoincrement())
+  youtubeId   String
+  title       String
+  slug        String
+  showId      Int?
+  show        Show?           @relation(fields: [showId], references: [id])
+  channelId   Int?
+  channel     YoutubeChannel? @relation(fields: [channelId], references: [id])
+  durationSec Int
+  date        DateTime
+  subtitles   Subtitle[]
+  transcript  String?
+  ignored     Boolean?
+
+  @@unique([youtubeId])
+  @@index([slug])
+  @@index([showId])
+  @@index([channelId])
   @@index([date])
+  @@index([youtubeId])
 }
 
 model Subtitle {
-  id        Int          @id @default(autoincrement())
-  startTime Int // in milliseconds or seconds (pick one and stay consistent)
-  endTime   Int
-  text      String
-  video     YoutubeVideo @relation(fields: [videoId], references: [id])
-  videoId   String
+  id          Int          @id @default(autoincrement())
+  order       Int
+  startTimeMs Int
+  endTimeMs   Int
+  text        String
+  video       YoutubeVideo @relation(fields: [videoId], references: [id])
+  videoId     Int
 
   @@index([videoId])
+  @@index([order])
 }
