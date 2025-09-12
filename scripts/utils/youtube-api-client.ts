@@ -72,6 +72,8 @@ export async function request(
   const detailResponse = await fetch(detailUrl);
   const detailJson: { items: VideoDetail[] } = await detailResponse.json();
 
+  console.log(`Got ${items.length} results from youtube`);
+
   return {
     nextPageToken,
     videos: items.map((item: PlaylistItem, index: number) => {
