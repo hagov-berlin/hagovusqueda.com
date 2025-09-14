@@ -37,11 +37,13 @@ const videosWithoutSubtitles = [
 export type Subtitle = [string, number, number];
 
 function convertSrtToArray(subtitleContent: string): Subtitle[] {
-  const data = subtitleContent.split("\n").filter((line) => line);
+  const subtitlesRaw = subtitleContent.split("\n\n").filter((line) => line);
   const subtitleArray: Subtitle[] = [];
-  for (let n = 0; n < data.length; n += 3) {
-    const [startTime, endTime] = data[n + 1].split(" --> ");
-    const text = data[n + 2];
+  for (const subtitleRaw of subtitlesRaw) {
+    const lines = subtitleRaw.split("\n");
+    if (lines.length !== 3) continue;
+    const [startTime, endTime] = lines[1].split(" --> ");
+    const text = lines[2];
     subtitleArray.push([text, timeToSeconds(startTime), timeToSeconds(endTime)]);
   }
   return subtitleArray;
