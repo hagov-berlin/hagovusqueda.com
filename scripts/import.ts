@@ -1,9 +1,14 @@
 import { PrismaClient } from "@prisma/client";
-import { importBlenderYoutubeVideos } from "./import-blender-youtube-videos";
+import { importYoutubePlaylist } from "./import-youtube-playlist";
 import { importYoutubeSubtitles } from "./import-youtube-subtitles";
 
 async function main(prismaClient: PrismaClient) {
-  await importBlenderYoutubeVideos(prismaClient);
+  const playlists = await prisma.youtubePlaylist.findMany();
+  for (const playlist of playlists) {
+    if (playlist.showId >= 20) {
+      // await importYoutubePlaylist(prismaClient, playlist, 1000);
+    }
+  }
   await importYoutubeSubtitles(prismaClient);
 }
 

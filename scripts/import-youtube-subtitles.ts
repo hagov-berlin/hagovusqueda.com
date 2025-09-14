@@ -1,32 +1,64 @@
-import { PrismaClient } from "@prisma/client";
-import { getSubtitlesForVideo } from "./utils/youtube-subtitles-client";
+import { PrismaClient, YoutubeVideo } from "@prisma/client";
+import { getSubtitlesForVideo, Subtitle } from "./utils/youtube-subtitles-client";
 
-export async function importYoutubeSubtitles(prisma: PrismaClient) {
+async function checkVideo(prisma: PrismaClient, video: YoutubeVideo) {
+  const subtitleCount = await prisma.subtitle.count({
+    where: {
+      videoId: video.id,
+    },
+  });
+  const missingTranscript = !video.transcript || video.transcript.length === 0;
+  const missingSubtitles = subtitleCount === 0;
+  const shouldBeUpdated = missingTranscript || missingSubtitles;
+  return {
+    missingTranscript,
+    missingSubtitles,
+    shouldBeUpdated,
+  };
+}
+
+async function getVideosThatSouldBeUpdated(prisma: PrismaClient) {
   const videos = await prisma.youtubeVideo.findMany({
     where: {
       ignored: false,
     },
   });
 
-  console.log(`Found ${videos.length} videos`);
+  let videosThatShouldBeUpdated: YoutubeVideo[] = [];
 
   for (const video of videos) {
-    const subtitleCount = await prisma.subtitle.count({
-      where: {
-        videoId: video.id,
-      },
-    });
+    const { shouldBeUpdated } = await checkVideo(prisma, video);
+    if (shouldBeUpdated) {
+      videosThatShouldBeUpdated.push(video);
+    }
+  }
 
-    const missingTranscript = !video.transcript || video.transcript.length === 0;
-    const missingSubtitles = subtitleCount === 0;
-    const shouldBeUpdated = missingTranscript || missingSubtitles;
+  console.log(
+    `Found ${videosThatShouldBeUpdated.length} videos without subtitles and/or transcript`
+  );
+  return videosThatShouldBeUpdated;
+}
 
-    if (!shouldBeUpdated) continue;
+export async function importYoutubeSubtitles(prisma: PrismaClient) {
+  const videos = await getVideosThatSouldBeUpdated(prisma);
 
-    const subtitles = await getSubtitlesForVideo(video.youtubeId);
+  console.log(`Found ${videos.length} videos`);
+
+  let count = 1;
+  for (const video of videos) {
+    console.log(`Video ${count} of ${videos.length}`);
+    count += 1;
+    const { missingTranscript, missingSubtitles } = await checkVideo(prisma, video);
+
+    let subtitles: Subtitle[] = [];
+    try {
+      subtitles = await getSubtitlesForVideo(video.youtubeId);
+    } catch (error) {
+      console.error(error);
+    }
 
     if (missingTranscript && subtitles.length > 0) {
-      console.log("Updating transcript", video.id);
+      // console.log("Updating transcript", video.youtubeId);
       await prisma.youtubeVideo.update({
         where: {
           id: video.id,
@@ -39,7 +71,7 @@ export async function importYoutubeSubtitles(prisma: PrismaClient) {
 
     if (missingSubtitles && subtitles.length > 0) {
       try {
-        console.log(video.id, subtitles.length);
+        // console.log(video.id, subtitles.length);
 
         const data = subtitles.map((subtitle, index) => {
           return {

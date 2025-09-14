@@ -1,24 +1,19 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, YoutubePlaylist } from "@prisma/client";
 import { request } from "./utils/youtube-api-client";
 import slugify from "slugify";
 
-const channelId = "UC6pJGaMdx5Ter_8zYbLoRgA"; // Blender Channel ID
-const blenderPlaylist = channelId.replace(/^UC/, "UU");
-
-export async function importBlenderYoutubeVideos(prisma: PrismaClient, limit = 50) {
-  const firstResponse = await request(blenderPlaylist);
+export async function importYoutubePlaylist(
+  prisma: PrismaClient,
+  playlist: YoutubePlaylist,
+  limit: number
+) {
+  const firstResponse = await request(playlist.youtubeId);
   let videos = firstResponse.videos;
   let nextPageToken = firstResponse.nextPageToken;
-  while (videos.length < limit) {
-    const nextResponse = await request(blenderPlaylist, nextPageToken);
+  while (videos.length < limit && nextPageToken) {
+    const nextResponse = await request(playlist.youtubeId, nextPageToken);
     (videos = [...videos, ...nextResponse.videos]), (nextPageToken = nextResponse.nextPageToken);
   }
-
-  const blenderChannel = await prisma.youtubeChannel.findFirst({
-    where: {
-      slug: "blender",
-    },
-  });
 
   for (const video of videos) {
     // Si el video no existe, crearlo primero
@@ -32,7 +27,9 @@ export async function importBlenderYoutubeVideos(prisma: PrismaClient, limit = 5
       }),
       date: new Date(video.date),
       durationSec: video.duration,
-      channelId: blenderChannel?.id,
+      channelId: playlist.channelId ? playlist.channelId : undefined,
+      showId: playlist.showId ? playlist.showId : undefined,
+      ignored: playlist.showId ? false : undefined,
     };
     await prisma.youtubeVideo.upsert({
       where: { youtubeId: video.videoId },

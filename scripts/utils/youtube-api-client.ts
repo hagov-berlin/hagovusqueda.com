@@ -39,6 +39,7 @@ type PlaylistItem = {
 };
 
 type VideoDetail = {
+  id: string;
   contentDetails: { duration: string };
   liveStreamingDetails?: {
     actualStartTime?: string;
@@ -77,12 +78,15 @@ export async function request(
   return {
     nextPageToken,
     videos: items.map((item: PlaylistItem, index: number) => {
-      const durationString = detailJson.items[index].contentDetails.duration;
+      const detail = detailJson.items.find(
+        (detailItem) => detailItem.id === item.snippet.resourceId.videoId
+      );
+      if (!detail) console.log("Missing detail for", item.snippet.resourceId.videoId);
+      const durationString = detail?.contentDetails.duration;
       return {
         videoId: item.snippet.resourceId.videoId,
         title: item.snippet.title,
-        date:
-          detailJson.items[index].liveStreamingDetails?.actualStartTime || item.snippet.publishedAt,
+        date: detail?.liveStreamingDetails?.actualStartTime || item.snippet.publishedAt,
         duration: isValidDuration(durationString) ? getDurationInSeconds(durationString) : 0,
       };
     }),

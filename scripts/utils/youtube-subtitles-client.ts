@@ -22,9 +22,19 @@ const videosWithoutSubtitles = [
   "7AN1Uj7XiyA", // DI
   "ellahOgTwxk", // EO
   "pq2mnDUOCbE", // DI
+  "oemMogZlZ-w", // Video removed
+  "VxQA4UBWLLY", // Triangulo de hierro
+  "qHY7SNppTOE", // Triangulo de hierro
+  "kOZEo6flxow", // La broma infinita
+  "utU7Rfm36FY", // Video removed
+  "aoMR35fpOsk", // La broma infinita
+  "xEC0NIwQVzs", // La broma infinita
+  "mckh_itq0_s", // La broma infinita
+  "wsPEXqAp0Vs", // La broma infinita
+  "XuBOIJPtIF4", // Video removed
 ];
 
-type Subtitle = [string, number, number];
+export type Subtitle = [string, number, number];
 
 function convertSrtToArray(subtitleContent: string): Subtitle[] {
   const data = subtitleContent.split("\n").filter((line) => line);
@@ -57,8 +67,8 @@ export async function getSubtitlesForVideo(
     console.log(`Downloading subtitles for ${videoId}`);
     try {
       const { stdout, stderr } = await execPromise(command);
-      console.log(stdout);
-      console.error(stderr);
+      // console.log(stdout);
+      // console.error(stderr);
     } catch (error) {
       console.error("Error downloading subtitles for", videoId);
       console.error(error);
@@ -72,7 +82,7 @@ export async function getSubtitlesForVideo(
   }
   const subtitleString = fs.readFileSync(outputPathWithExtension).toString();
 
-  console.log(`Converting raw subtitle to JSON for video ${videoId}`);
+  // console.log(`Converting raw subtitle to JSON for video ${videoId}`);
   const subtitleArray = convertSrtToArray(subtitleString);
 
   if (deleteTmpFile) {
