@@ -4,21 +4,27 @@ import { FastifyRequest } from "fastify";
 import { parseQuery } from "./utils";
 
 export async function videos(req: FastifyRequest) {
-  const { page, show } = parseQuery(req);
-  const filters: Prisma.YoutubeVideoWhereInput = {};
+  const { page, show, channel } = parseQuery(req);
+
+  const filters: Prisma.YoutubeVideoWhereInput = {
+    ignored: false,
+  };
+
   if (show.length == 1) {
     filters.show.slug = show[0];
   } else if (show.length > 1) {
     filters.show.slug = { in: show };
   }
 
+  if (channel) {
+    filters.channel = { slug: channel };
+  }
+
   // TODO: Date filters
 
   return prisma.youtubeVideo
     .paginate({
-      where: {
-        ignored: false,
-      },
+      where: filters,
       include: {
         show: { select: { slug: true } },
         channel: { select: { slug: true } },

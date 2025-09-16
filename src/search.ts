@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import prisma from "./db";
-import { Subtitle, YoutubeVideo } from "@prisma/client";
+import { Show, Subtitle } from "@prisma/client";
 import { parseQuery } from "./utils";
 
 async function getVideoIdsFromPostgresTextSearch(
@@ -15,13 +15,10 @@ async function getVideoIdsFromPostgresTextSearch(
   `;
 
   const params: [string, number[]?] = [q];
-  let paramIndex = 2;
 
   if (showIds.length > 0) {
-    sqlQuery += ` AND v."showId" = ANY($${paramIndex}::int[])`;
+    sqlQuery += ` AND v."showId" = ANY($2::int[])`;
     params.push(showIds);
-    paramIndex++;
-    console.log({ showIds });
   }
   sqlQuery += `LIMIT ${limit};`;
 
@@ -105,7 +102,7 @@ function splitIntoChunks<T>(list: T[], chunkSize: number = 50): T[][] {
 }
 
 export default async function search(req: FastifyRequest, reply: FastifyReply) {
-  const { q, show: showSlugs } = parseQuery(req);
+  const { q, show: showSlugs, channel: channelSlug } = parseQuery(req);
 
   if (!q) {
     return reply.status(400).send({ error: "Missing query param 'q'" });
@@ -113,7 +110,14 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
 
   const startTime = new Date().getTime();
 
-  const shows = await prisma.show.findMany({ where: { slug: { in: showSlugs } } });
+  let shows: Show[] = [];
+  if (showSlugs.length > 0) {
+    shows = await prisma.show.findMany({ where: { slug: { in: showSlugs } } });
+  } else if (channelSlug) {
+    shows = await prisma.show.findMany({
+      where: { channel: { slug: channelSlug } },
+    });
+  }
   const showIds = shows.map((show) => show.id);
 
   const videoIds = await getVideoIdsFromPostgresTextSearch(q, showIds);

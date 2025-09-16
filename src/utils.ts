@@ -3,7 +3,7 @@ import { FastifyRequest } from "fastify";
 export function parseQuery(req: FastifyRequest) {
   const query = req.query as Record<string, string | undefined>;
 
-  const { q, show: showString, page: pageString } = query;
+  const { q, show: showString, channel, page: pageString } = query;
 
   const page = pageString ? parseInt(pageString) : 1;
 
@@ -16,5 +16,5 @@ export function parseQuery(req: FastifyRequest) {
       .filter((s) => s.length < 20);
   }
 
-  return { q, page, show };
+  return { q, page, show, channel };
 }

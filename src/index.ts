@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import prisma from "./db";
 import cors from "@fastify/cors";
 import { videos, video } from "./video";
+import { channels } from "./channel";
 import search from "./search";
 
 const fastify = Fastify({ logger: true });
@@ -21,6 +22,8 @@ fastify.get("/favicon.ico", (req, res) => res.status(204)); // TODO
 fastify.get("/videos", videos);
 
 fastify.get("/videos/:id", video);
+
+fastify.get("/channels", channels);
 
 fastify.get("/search", search);
 
