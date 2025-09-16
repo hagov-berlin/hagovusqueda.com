@@ -24,6 +24,7 @@ model YoutubeChannel {
   videos    YoutubeVideo[]
 
   @@unique([youtubeId])
+  @@unique([slug])
   @@index([slug])
 }
 
@@ -36,6 +37,7 @@ model Show {
   playlists YoutubePlaylist[]
   videos    YoutubeVideo[]
 
+  @@unique([slug])
   @@index([slug])
   @@index([channelId])
 }
