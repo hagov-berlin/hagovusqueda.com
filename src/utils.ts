@@ -13,7 +13,7 @@ export function parseQuery(req: FastifyRequest) {
       .split(",")
       .slice(0, 20)
       .map((s) => s.trim())
-      .filter((s) => s.length < 20);
+      .filter((s) => s.length < 500);
   }
 
   return { q, page, show, channel };

@@ -11,9 +11,9 @@ export async function videos(req: FastifyRequest) {
   };
 
   if (show.length == 1) {
-    filters.show.slug = show[0];
+    filters.show = { slug: show[0] };
   } else if (show.length > 1) {
-    filters.show.slug = { in: show };
+    filters.show = { slug: { in: show } };
   }
 
   if (channel) {
