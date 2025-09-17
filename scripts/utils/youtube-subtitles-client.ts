@@ -43,7 +43,7 @@ function convertSrtToArray(subtitleContent: string): Subtitle[] {
     const lines = subtitleRaw.split("\n");
     if (lines.length !== 3) continue;
     const [startTime, endTime] = lines[1].split(" --> ");
-    const text = lines[2];
+    const text = lines.slice(2).join(" ");
     subtitleArray.push([text, timeToSeconds(startTime), timeToSeconds(endTime)]);
   }
   return subtitleArray;
