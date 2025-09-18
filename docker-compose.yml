@@ -17,7 +17,8 @@ services:
       - hagovusqueda
 
   api:
-    build: .
+    build:
+      context: ./api
     container_name: api
     command: npm run start
     ports:

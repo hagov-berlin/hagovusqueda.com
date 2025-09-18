@@ -1,17 +1,9 @@
 {
-  "name": "api.hagovusqueda.com",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "hagovusqueda.com",
   "scripts": {
-    "dev": "nodemon src/index.ts",
-    "build": "tsc",
-    "start": "node dist/src/index.js",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema ./api/prisma/schema.prisma",
     "import-data": "ts-node scripts/import.ts"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
@@ -22,12 +14,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@fastify/cors": "^11.1.0",
     "@prisma/client": "^6.15.0",
-    "dotenv": "^17.2.2",
-    "fastify": "^5.6.0",
-    "newrelic": "^13.3.2",
-    "prisma-extension-pagination": "^0.7.5",
-    "slugify": "^1.6.6"
+    "dotenv": "^17.2.2"
   }
 }

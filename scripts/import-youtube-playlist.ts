@@ -16,7 +16,6 @@ export async function importYoutubePlaylist(
   }
 
   for (const video of videos) {
-    // Si el video no existe, crearlo primero
     const payload = {
       youtubeId: video.videoId,
       title: video.title,
