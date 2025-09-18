@@ -40,17 +40,6 @@ services:
     networks:
       - hagovusqueda
 
-  studio:
-    build: .
-    command: npx prisma studio
-    container_name: studio_db
-    ports:
-      - "5555:5555"
-    env_file:
-      - .env
-    networks:
-      - hagovusqueda
-
   adminer:
     image: adminer
     restart: always
