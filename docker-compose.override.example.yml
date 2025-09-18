@@ -6,3 +6,9 @@ services:
     volumes:
       - ./api:/app
       - /app/node_modules
+
+  frontend:
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

@@ -28,6 +28,18 @@ services:
     networks:
       - hagovusqueda
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    command: npm run start
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    networks:
+      - hagovusqueda
+
   nginx:
     image: nginx:alpine
     container_name: nginx

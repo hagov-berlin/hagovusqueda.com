@@ -1,0 +1,60 @@
+.button {
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: #a51681;
+  color: white;
+  position: relative;
+
+  &:hover {
+    background: #b6138d;
+  }
+
+  &:active {
+    background: #cf0e9f;
+  }
+
+  &:focus {
+    outline: solid 1px #ce4dae;
+  }
+}
+
+.searchButton {
+  border-radius: 0 4px 4px 0;
+  font-size: 20px;
+
+  @media (max-width: 628px) {
+    border-radius: 4px;
+  }
+
+  &:before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: #a51681;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+
+    @media (max-width: 628px) {
+      content: none;
+    }
+  }
+
+  &:hover {
+    &:before {
+      background: #b6138d;
+    }
+  }
+
+  &:active {
+    &:before {
+      background: #cf0e9f;
+    }
+  }
+}

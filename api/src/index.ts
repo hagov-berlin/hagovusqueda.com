@@ -28,12 +28,13 @@ fastify.get("/channels", channels);
 fastify.get("/search", search);
 
 const start = async () => {
+  const port = 3001;
   try {
     await fastify.register(cors, {
       origin: "*",
     });
-    await fastify.listen({ port: 3001, host: "0.0.0.0" });
-    console.log("Server running on http://localhost:3000");
+    await fastify.listen({ port, host: "0.0.0.0" });
+    console.log(`Server running on http://localhost:${port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

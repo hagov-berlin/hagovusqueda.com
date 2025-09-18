@@ -1,0 +1,40 @@
+.videoResult {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (max-width: 628px) {
+    gap: 32px;
+  }
+}
+
+.videoResultHeader {
+  display: flex;
+  gap: 12px;
+
+  @media (max-width: 628px) {
+    flex-direction: column;
+  }
+}
+
+.videoResultTitleContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: auto;
+}
+
+.videoResultTitle {
+  display: inline;
+}
+
+.videoThumbnail {
+  width: auto;
+  height: 140px;
+  border-radius: 4px;
+
+  @media (max-width: 628px) {
+    width: 100%;
+    height: auto;
+  }
+}

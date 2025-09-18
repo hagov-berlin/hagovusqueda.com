@@ -1,0 +1,92 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.subtitle {
+  font-size: 32px;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.mainForm {
+  display: flex;
+
+  @media (max-width: 628px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.inputContainer {
+  position: relative;
+  flex-grow: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  width: 26px;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  font-size: 22px;
+  padding-left: 50px;
+  border-radius: 4px 0 0 4px;
+  border: none;
+
+  @media (max-width: 628px) {
+    border-radius: 4px;
+  }
+
+  &:focus {
+    outline: solid 1px #c518de;
+  }
+}
+
+.advancedOptions {
+  display: flex;
+  gap: 16px;
+}
+
+.advancedOptions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.advancedOptions select {
+  appearance: none;
+  background: none;
+  border: solid 2px #c518de;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-weight: 500;
+  position: relative;
+  cursor: pointer;
+}
+
+.advancedOptions select,
+.advancedOptions option {
+  color: currentColor;
+  background: #222;
+}
+
+.advancedOptions select:hover {
+  border-color: #b6138d;
+}
+
+.showSelect label {
+  font-size: 18px;
+}
+.showSelect select {
+  font-size: 1em;
+}
