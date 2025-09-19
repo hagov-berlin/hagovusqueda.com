@@ -5,9 +5,10 @@ import { importYoutubeSubtitles } from "./import-youtube-subtitles";
 async function main(prismaClient: PrismaClient) {
   const playlists = await prisma.youtubePlaylist.findMany();
   for (const playlist of playlists) {
-    if (playlist.showId >= 20) {
-      // await importYoutubePlaylist(prismaClient, playlist, 1000);
-    }
+    console.log(
+      `Updating from playlist ${playlist.id}, channel ${playlist.channelId}, show ${playlist.showId}`
+    );
+    await importYoutubePlaylist(prismaClient, playlist, 50);
   }
   await importYoutubeSubtitles(prismaClient);
 }

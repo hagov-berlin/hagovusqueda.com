@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { exec } from "child_process";
-import util from "node:util";
-
-const execPromise = util.promisify(exec);
+import { downloadSubtitles } from "./yt-dlp-client";
 
 function timeToSeconds(rawTimeString: string) {
   if (!rawTimeString.includes(",")) throw new Error(`Cannot parse "${rawTimeString}"`);
@@ -64,13 +61,8 @@ export async function getSubtitlesForVideo(
   if (fs.existsSync(outputPathWithExtension)) {
     console.log(`Skipping download of subtitles for ${videoId}. Already downloaded`);
   } else {
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const command = `yt-dlp "${videoUrl}" --skip-download --write-auto-sub --sub-lang "es" --sub-format srt --output "${outputPath}"`;
-    console.log(`Downloading subtitles for ${videoId}`);
     try {
-      const { stdout, stderr } = await execPromise(command);
-      // console.log(stdout);
-      // console.error(stderr);
+      await downloadSubtitles(videoId, outputPath);
     } catch (error) {
       console.error("Error downloading subtitles for", videoId);
       console.error(error);
