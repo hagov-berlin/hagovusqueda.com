@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Germania_One } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 
@@ -12,12 +10,6 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const germaniaOne = Germania_One({
-  variable: "--font-germania-one",
-  weight: "400",
   subsets: ["latin"],
 });
 
@@ -33,11 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${germaniaOne.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Script async type="text/javascript" src="/newrelic.js" />
         {children}
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
