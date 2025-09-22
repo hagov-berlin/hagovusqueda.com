@@ -2,8 +2,9 @@ import "newrelic";
 import Fastify from "fastify";
 import prisma from "./db";
 import cors from "@fastify/cors";
+import { channels, channel } from "./channel";
+import { shows, show } from "./show";
 import { videos, video } from "./video";
-import { channels } from "./channel";
 import search from "./search";
 
 const fastify = Fastify({ logger: true });
@@ -19,11 +20,14 @@ fastify.get("/db-check", async () => {
 
 fastify.get("/favicon.ico", (req, res) => res.status(204)); // TODO
 
-fastify.get("/videos", videos);
-
-fastify.get("/videos/:id", video);
-
 fastify.get("/channels", channels);
+fastify.get("/channels/:slug", channel);
+
+fastify.get("/shows", shows);
+fastify.get("/shows/:slug", show);
+
+fastify.get("/videos", videos);
+fastify.get("/videos/:id", video);
 
 fastify.get("/search", search);
 
