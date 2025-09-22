@@ -2,10 +2,10 @@
 
 import { Suspense } from "react";
 
-import Form from "@/components/form";
-import ResultsContainer from "@/components/results-container";
-import FAQs from "@/components/faqs";
-import { useSearch } from "@/components/hooks";
+import Form from "@/components/home/form";
+import ResultsContainer from "@/components/home/results-container";
+import FAQs from "@/components/home/faqs";
+import { useSearch } from "@/components/home/hooks";
 
 import styles from "./page.module.css";
 
