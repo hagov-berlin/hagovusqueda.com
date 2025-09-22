@@ -20,7 +20,7 @@ async function getVideoIdsFromPostgresTextSearch(
     sqlQuery += ` AND v."showId" = ANY($2::int[])`;
     params.push(showIds);
   }
-  sqlQuery += `LIMIT ${limit};`;
+  sqlQuery += ` ORDER BY v.date DESC LIMIT ${limit};`;
 
   const results: { youtubeId: string }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
   return results.map((result) => result.youtubeId);
@@ -32,7 +32,7 @@ function getVideosWithSubtitles(videoIds: string[]) {
       youtubeId: { in: videoIds },
     },
     include: {
-      subtitles: { orderBy: { order: "asc" } },
+      subtitles: { orderBy: { order: "asc" }, omit: { id: true, videoId: true } },
       show: { select: { name: true, slug: true } },
       channel: { select: { name: true, slug: true } },
     },
@@ -48,10 +48,11 @@ function getVideosWithSubtitles(videoIds: string[]) {
 }
 
 function normalizeText(text: string, ignoreAccents: boolean) {
+  text = text.replace(/[,\.¿\?¡!\-]/g, "");
   if (ignoreAccents) {
-    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
-  return text;
+  return text.replace(/\s+/g, " ");
 }
 
 function buildRegex(q: string, ignoreAccents: boolean = true, matchWholeWords: boolean = false) {
@@ -66,7 +67,10 @@ function buildRegex(q: string, ignoreAccents: boolean = true, matchWholeWords: b
 
 type VideoWithSubtitles = Awaited<ReturnType<typeof getVideosWithSubtitles>>[number];
 
-function filterSubtitles(subtitles: Subtitle[], textMatcher: (text: string) => boolean) {
+function filterSubtitles<T extends { text: string }>(
+  subtitles: T[],
+  textMatcher: (text: string) => boolean
+): T[] {
   const matches = subtitles.filter((subtitle, index) => {
     const subtitleText = subtitle.text;
     const subtitleMatches = textMatcher(subtitleText);
@@ -129,7 +133,7 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
     const newResults = filterVideos(fullVideos, q);
     results = [...results, ...newResults];
     subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
-    if (results.length > 100 || subtitleResults > 1000) {
+    if (results.length > 50 || subtitleResults > 500) {
       resultsCapped = true;
       break;
     }
