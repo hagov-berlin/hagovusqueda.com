@@ -1,16 +1,3 @@
-export const AVAILABLE_SHOWS_OLD = {
-  EO: "escucho-ofertas",
-  DI: "desayuno-intermitente",
-  HYF: "horrible-y-fascinante",
-  HAA: "hay-algo-ahi",
-  ESPECIAL: "especiales-blender",
-  CS: "costa-stream",
-  SCDY: "san-clemente-del-youtube",
-  EEC: "esto-es-cine",
-  BG: "balas-gratis",
-  MAGA: "maga",
-} as const;
-
 export const AVAILABLE_SHOWS = {
   "escucho-ofertas": "Escucho Ofertas",
   "desayuno-intermitente": "Desayuno Intermitente",
@@ -22,5 +9,6 @@ export const AVAILABLE_SHOWS = {
   "esto-es-cine": "Esto Es Cine",
   "balas-gratis": "Balas Gratis",
   "caricias-significativas": "Caricias Significativas",
+  "el-metodo-rebord": "El Método Rebord",
   maga: "M.A.G.A.",
 } as const;

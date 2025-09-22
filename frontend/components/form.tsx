@@ -4,7 +4,7 @@ import styles from "./form.module.css";
 import { defaultParams, urlWithQueryParams } from "./utils";
 import Button from "./button";
 import { useHagovSearchParams } from "./hooks";
-import { Show } from "@/data/types";
+import { ShowString } from "@/data/types";
 import { AVAILABLE_SHOWS } from "@/data/shows";
 
 type FormProps = {
@@ -21,7 +21,7 @@ export default function Form(props: FormProps) {
     event.preventDefault();
     if (!inputRef.current || !showSelectRef.current || props.loading) return;
     const searchTerm = inputRef.current.value;
-    const show = showSelectRef.current.value as Show;
+    const show = showSelectRef.current.value as ShowString;
     const newUrl = urlWithQueryParams({
       ...defaultParams,
       searchTerm,

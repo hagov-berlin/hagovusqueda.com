@@ -1,4 +1,4 @@
-import { Result, Show } from "@/data/types";
+import { Result, ShowString } from "@/data/types";
 import VideoResult from "./video-result";
 import styles from "./results-container.module.css";
 import { useHagovSearchParams } from "./hooks";
@@ -18,7 +18,7 @@ function getTitle(
   results: Result[],
   searchTerm: string,
   resultsCapped: boolean,
-  show: Show
+  show: ShowString
 ) {
   if (loading) {
     return "Buscando...";

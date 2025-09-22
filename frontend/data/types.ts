@@ -7,17 +7,18 @@ export type Subtitle = {
 };
 export type VideoId = string;
 
-export type Show = keyof typeof AVAILABLE_SHOWS;
+export type ShowString = keyof typeof AVAILABLE_SHOWS;
 
-export function isShow(showString: string): showString is Show {
+export function isShow(showString: string): showString is ShowString {
   return !!Object.keys(AVAILABLE_SHOWS).find((show) => show === showString);
 }
 
 export type Video = {
   youtubeId: VideoId;
   title: string;
+  slug: string;
   date: string;
-  show: Show;
+  show: ShowString;
   durationSec: number;
 };
 
@@ -27,7 +28,7 @@ export type Result = Video & {
 
 export type HagovSearchParams = {
   searchTerm: string;
-  show: Show;
+  show: ShowString;
   dateFrom?: string;
   dateUntil?: string;
 };
@@ -35,4 +36,15 @@ export type HagovSearchParams = {
 export type SearchResult = {
   results: Result[];
   resultsCapped: boolean;
+};
+
+export type Channel = {
+  slug: string;
+  name: string;
+  shows: Show[];
+};
+
+export type Show = {
+  slug: string;
+  name: string;
 };
