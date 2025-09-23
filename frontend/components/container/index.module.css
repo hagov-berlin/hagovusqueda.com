@@ -1,0 +1,29 @@
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px;
+
+  @media (max-width: 628px) {
+    padding: 24px;
+  }
+}
+
+.darkBackground {
+  background: #222;
+  color: white;
+}
+
+.top {
+  background: #222;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 64px 64px 64px;
+
+  @media (max-width: 628px) {
+    padding: 24px;
+  }
+}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import FAQs from "@/components/common/faqs";
+import Container from "@/components/container";
 import styles from "./layout.module.css";
 import "./globals.css";
 
@@ -32,16 +32,15 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Script async type="text/javascript" src="/newrelic.js" />
         <div className={styles.pageContainer}>
-          <div className={styles.headerContainer}>
+          <Container dark>
             <header className={styles.header}>
               <Link href="/" className={styles.logo} />
+              {/* <Link href="/canales">Canales</Link>
+              <Link href="/shows">Shows</Link> */}
               <Link href="/videos">Videos</Link>
             </header>
-          </div>
+          </Container>
           <main>{children}</main>
-          <footer className={styles.footer}>
-            <FAQs />
-          </footer>
           {/* <footer /> Footer with links to all channels and shows */}
         </div>
       </body>

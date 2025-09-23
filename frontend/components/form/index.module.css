@@ -12,3 +12,7 @@
     gap: 8px;
   }
 }
+
+.formContainer {
+  padding-top: 0;
+}
