@@ -3,11 +3,12 @@ import VideoList from "@/components/video-list";
 import { getVideos } from "@/data/api-client";
 
 export default async function Videos() {
-  const [videos] = await getVideos();
+  // TODO: duplicated component with app/videos/[slug]/page.tsx
+  const [videos, pagination] = await getVideos();
 
   return (
     <Container>
-      <VideoList videos={videos} />
+      <VideoList videos={videos} pagination={pagination} />
     </Container>
   );
 }

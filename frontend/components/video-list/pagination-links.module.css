@@ -1,0 +1,20 @@
+.paginationContainer {
+  margin-bottom: 64px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.paginationContainer a {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: solid 1px #ccc;
+  text-decoration: none;
+}
+
+.currentPage {
+  pointer-events: none;
+  background: #7b118b;
+  color: white;
+}
