@@ -54,7 +54,7 @@
   background-position: center;
   margin-right: auto;
 
-  @media (max-width: 428px) {
+  @media (max-width: 328px) {
     background-image: url("/logo-small.png");
     aspect-ratio: 0.7;
     width: 30px;

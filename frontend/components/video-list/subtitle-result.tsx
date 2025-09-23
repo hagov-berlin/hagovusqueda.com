@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Subtitle } from "@/data/types";
 import styles from "./subtitle-result.module.css";

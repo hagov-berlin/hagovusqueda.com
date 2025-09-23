@@ -35,6 +35,7 @@ export default function RootLayout({
           <div className={styles.headerContainer}>
             <header className={styles.header}>
               <Link href="/" className={styles.logo} />
+              <Link href="/videos">Videos</Link>
             </header>
           </div>
           <main>{children}</main>

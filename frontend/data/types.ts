@@ -21,7 +21,7 @@ export type Video = {
   title: string;
   slug: string;
   durationSec: number;
-  date: Date;
+  date: string;
 
   transcript?: string;
   subtitles?: Subtitle[];
