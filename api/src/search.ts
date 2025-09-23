@@ -34,7 +34,7 @@ function getVideosWithSubtitles(videoIds: string[]) {
     include: {
       subtitles: { orderBy: { order: "asc" }, omit: { id: true, videoId: true } },
       show: { select: { name: true, slug: true } },
-      channel: { select: { name: true, slug: true } },
+      channel: { select: { name: true, slug: true, youtubeId: true } },
     },
     omit: {
       transcript: true,

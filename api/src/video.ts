@@ -3,6 +3,29 @@ import prisma from "./db";
 import { FastifyRequest } from "fastify";
 import { parseQuery } from "./utils";
 
+const include: Prisma.YoutubeVideoInclude = {
+  show: {
+    select: {
+      name: true,
+      slug: true,
+    },
+  },
+  channel: {
+    select: {
+      name: true,
+      slug: true,
+      youtubeId: true,
+    },
+  },
+};
+
+const omit: Prisma.YoutubeVideoOmit = {
+  id: true,
+  showId: true,
+  channelId: true,
+  ignored: true,
+};
+
 export async function videos(req: FastifyRequest) {
   const { page, show, channel } = parseQuery(req);
 
@@ -25,16 +48,10 @@ export async function videos(req: FastifyRequest) {
   return prisma.youtubeVideo
     .paginate({
       where: filters,
-      include: {
-        show: { select: { slug: true } },
-        channel: { select: { slug: true } },
-      },
+      include,
       omit: {
-        id: true,
-        showId: true,
-        channelId: true,
+        ...omit,
         transcript: true,
-        ignored: true,
       },
       orderBy: {
         date: "desc",
@@ -48,15 +65,12 @@ export async function video(req: FastifyRequest) {
   return await prisma.youtubeVideo.findFirst({
     where: { youtubeId: id },
     include: {
-      subtitles: { orderBy: { order: "asc" } },
-      show: { select: { name: true, slug: true } },
-      channel: { select: { name: true, slug: true } },
+      ...include,
+      subtitles: {
+        orderBy: { order: "asc" },
+        omit: { id: true },
+      },
     },
-    omit: {
-      id: true,
-      showId: true,
-      channelId: true,
-      ignored: true,
-    },
+    omit,
   });
 }
