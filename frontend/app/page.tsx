@@ -1,37 +1,19 @@
-"use client";
+import Form from "@/components/form";
+import Results from "@/components/results";
+import Main from "@/components/containers/main";
+import Top from "@/components/containers/top";
+import { SearchContextProvider } from "@/data/context";
 
-import { Suspense } from "react";
-
-import Form from "@/components/home/form";
-import ResultsContainer from "@/components/home/results-container";
-import FAQs from "@/components/home/faqs";
-import { useSearch } from "@/components/home/hooks";
-
-import styles from "./page.module.css";
-
-function Page() {
-  const { results, loading, resultsCapped } = useSearch();
-
+export default async function Home(props: { searchParams: Promise<Record<string, string>> }) {
+  const params = await props.searchParams;
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.logo} />
-        <Form loading={loading} />
-      </header>
-      <main className={styles.main}>
-        <ResultsContainer loading={loading} results={results} resultsCapped={resultsCapped} />
-      </main>
-      <footer className={styles.footer}>
-        <FAQs />
-      </footer>
-    </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense>
-      <Page />
-    </Suspense>
+    <SearchContextProvider searchParams={params}>
+      <Top>
+        <Form />
+      </Top>
+      <Main>
+        <Results />
+      </Main>
+    </SearchContextProvider>
   );
 }

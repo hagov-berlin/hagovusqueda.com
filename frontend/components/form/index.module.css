@@ -1,0 +1,14 @@
+.subtitle {
+  font-size: 32px;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.mainForm {
+  display: flex;
+
+  @media (max-width: 628px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Subtitle } from "@/data/types";
 import styles from "./subtitle-result.module.css";
-import Button from "./button";
+import Button from "../common/button";
 
 function secondsToTime(milisecondsNumber: number) {
   const cleanedSeconds = Math.max(0, milisecondsNumber / 1000);

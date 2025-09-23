@@ -1,29 +1,30 @@
-import { Result, ShowString } from "@/data/types";
+"use client";
 import VideoResult from "./video-result";
-import styles from "./results-container.module.css";
-import { useHagovSearchParams } from "./hooks";
-import { AVAILABLE_SHOWS } from "@/data/shows";
+import styles from "./index.module.css";
+import { useSearchContext } from "@/data/context";
+import { Video } from "@/data/types";
 
-function countSubtitles(results: Result[]) {
-  const count = results.reduce((accum, result) => accum + result.subtitles.length, 0);
+function countSubtitles(results: Video[]) {
+  const count = results.reduce((accum, result) => {
+    return accum + (result.subtitles?.length || 0);
+  }, 0);
   return `${count} ${count === 1 ? "resultado" : "resultados"}`;
 }
 
-function countResults(results: Result[]) {
+function countResults(results: Video[]) {
   return `${results.length} ${results.length === 1 ? "video" : "videos"}`;
 }
 
 function getTitle(
   loading: boolean,
-  results: Result[],
+  results: Video[],
   searchTerm: string,
   resultsCapped: boolean,
-  show: ShowString
+  showName: string
 ) {
   if (loading) {
     return "Buscando...";
   }
-  const showName = AVAILABLE_SHOWS[show];
   const quotedSearchTerm = <span>“{searchTerm}”</span>;
   if (results.length === 0) {
     return (
@@ -48,20 +49,12 @@ function getTitle(
   );
 }
 
-type ResultsContainerProps = {
-  loading: boolean;
-  results: Result[];
-  resultsCapped: boolean;
-};
+export default function Results() {
+  const { loading, results, resultsCapped, show, q } = useSearchContext();
 
-export default function ResultsContainer(props: ResultsContainerProps) {
-  const { loading, results, resultsCapped } = props;
+  if (!q) return null;
 
-  const { searchTerm, show } = useHagovSearchParams();
-
-  if (!searchTerm) return null;
-
-  const title = getTitle(loading, results, searchTerm, resultsCapped, show);
+  const title = getTitle(loading, results, q, resultsCapped, show);
 
   return (
     <div className={styles.results}>

@@ -1,0 +1,39 @@
+.advancedOptions {
+  display: flex;
+  gap: 16px;
+}
+
+.advancedOptions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.advancedOptions select {
+  appearance: none;
+  background: none;
+  border: solid 2px #c518de;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-weight: 500;
+  position: relative;
+  cursor: pointer;
+}
+
+.advancedOptions select,
+.advancedOptions option {
+  color: currentColor;
+  background: #222;
+}
+
+.advancedOptions select:hover {
+  border-color: #b6138d;
+}
+
+.showSelect label {
+  font-size: 18px;
+}
+.showSelect select {
+  font-size: 1em;
+}

@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import type { Result } from "@/data/types";
+import type { Video } from "@/data/types";
 import styles from "./video-result.module.css";
 import { SubtitleResult } from "./subtitle-result";
 
@@ -8,7 +8,7 @@ function parseDate(dateString: string) {
 }
 
 type ResultProps = {
-  result: Result;
+  result: Video;
 };
 
 export default function VideoResult(props: ResultProps) {
@@ -28,7 +28,7 @@ export default function VideoResult(props: ResultProps) {
           alt={result.title}
         />
       </div>
-      {result.subtitles.map((subtitle, index) => (
+      {result.subtitles?.map((subtitle, index) => (
         <SubtitleResult key={index} videoId={result.youtubeId} subtitle={subtitle} />
       ))}
     </div>

@@ -1,50 +1,72 @@
-import { AVAILABLE_SHOWS } from "./shows";
+export type Pagination = {
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  currentPage: number;
+  previousPage: number | null;
+  nextPage: number | null;
+  pageCount: number;
+  totalCount: number;
+};
 
 export type Subtitle = {
+  order: number;
   startTimeMs: number;
   endTimeMs: number;
   text: string;
+  videoId: number;
 };
-export type VideoId = string;
-
-export type ShowString = keyof typeof AVAILABLE_SHOWS;
-
-export function isShow(showString: string): showString is ShowString {
-  return !!Object.keys(AVAILABLE_SHOWS).find((show) => show === showString);
-}
 
 export type Video = {
-  youtubeId: VideoId;
+  youtubeId: string;
   title: string;
   slug: string;
-  date: string;
-  show: ShowString;
   durationSec: number;
-};
+  date: Date;
 
-export type Result = Video & {
-  subtitles: Subtitle[];
-};
+  transcript?: string;
+  subtitles?: Subtitle[];
 
-export type HagovSearchParams = {
-  searchTerm: string;
-  show: ShowString;
-  dateFrom?: string;
-  dateUntil?: string;
-};
+  channel: {
+    name: string;
+    slug: string;
+    youtubeId: string;
+  };
 
-export type SearchResult = {
-  results: Result[];
-  resultsCapped: boolean;
-};
-
-export type Channel = {
-  slug: string;
-  name: string;
-  shows: Show[];
+  show: {
+    name: string;
+    slug: string;
+  };
 };
 
 export type Show = {
-  slug: string;
   name: string;
+  slug: string;
+
+  channel: {
+    name: string;
+    slug: string;
+    youtubeId: string;
+  };
+};
+
+export type Channel = {
+  name: string;
+  slug: string;
+  youtubeId: string;
+
+  shows: {
+    name: string;
+    slug: string;
+  }[];
+};
+
+export type SearchOptions = {
+  q: string;
+  show: string;
+  channel?: string;
+};
+
+export type SearchResults = {
+  results: Video[];
+  resultsCapped: boolean;
 };
