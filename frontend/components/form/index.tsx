@@ -1,4 +1,3 @@
-import { getShows } from "@/data/api-client";
 import Button from "../common/button";
 import FormElement from "./form-element";
 import { FormInput } from "./form-input";
@@ -6,9 +5,7 @@ import styles from "./index.module.css";
 import FormSelect from "./form-select";
 import Container from "../container";
 
-export default async function FormFontainer() {
-  const shows = await getShows();
-
+export default async function FormContainer() {
   return (
     <Container dark className={styles.formContainer}>
       <FormElement>
@@ -19,7 +16,7 @@ export default async function FormFontainer() {
             <Button searchButton>BUSCAR</Button>
           </div>
         </div>
-        <FormSelect shows={shows} />
+        <FormSelect />
       </FormElement>
     </Container>
   );

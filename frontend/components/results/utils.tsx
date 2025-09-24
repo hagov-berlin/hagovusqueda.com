@@ -1,4 +1,4 @@
-import { Video } from "@/data/types";
+import { SearchOptions, SearchResults, Show, Video } from "@/data/types";
 
 function countSubtitles(results: Video[]) {
   const count = results.reduce((accum, result) => {
@@ -12,35 +12,40 @@ function countResults(results: Video[]) {
 }
 
 export function getTitle(
-  loading: boolean,
-  results: Video[],
-  searchTerm: string,
-  resultsCapped: boolean,
-  showName: string
+  searchOptions: SearchOptions,
+  searchResults: SearchResults,
+  availableShows: Show[]
 ) {
-  if (loading) {
+  if (searchResults.loading) {
     return "Buscando...";
   }
-  const quotedSearchTerm = <span>“{searchTerm}”</span>;
-  if (results.length === 0) {
+
+  const showName =
+    availableShows.find((show) => show.slug === searchOptions.showSlug)?.name ||
+    searchOptions.showSlug;
+  const showPart = searchOptions.showSlug ? `en ${showName}` : "";
+
+  const quotedSearchTerm = <span>“{searchOptions.q}”</span>;
+  if (searchResults.results.length === 0) {
     return (
       <>
-        No hay resultados para {quotedSearchTerm} en {showName}
+        No hay resultados para {quotedSearchTerm} {showPart}
       </>
     );
   }
-  const subtitlesCount = countSubtitles(results);
-  const videosCount = countResults(results);
-  if (resultsCapped) {
+
+  const subtitlesCount = countSubtitles(searchResults.results);
+  const videosCount = countResults(searchResults.results);
+  if (searchResults.resultsCapped) {
     return (
       <>
-        Mas de {subtitlesCount} en {videosCount} para {quotedSearchTerm} en {showName}
+        Mas de {subtitlesCount} en {videosCount} para {quotedSearchTerm} {showPart}
       </>
     );
   }
   return (
     <>
-      {subtitlesCount} en {videosCount} para {quotedSearchTerm} en {showName}
+      {subtitlesCount} en {videosCount} para {quotedSearchTerm} {showPart}
     </>
   );
 }

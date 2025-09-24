@@ -4,11 +4,11 @@ import { getTitle } from "./utils";
 import VideoList from "../video-list";
 
 export default function Results() {
-  const { loading, results, resultsCapped, show, q } = useSearchContext();
+  const { searchOptions, searchResults, availableShows } = useSearchContext();
 
-  if (!q) return null;
+  if (!searchOptions.q) return null;
 
-  const title = getTitle(loading, results, q, resultsCapped, show);
+  const title = getTitle(searchOptions, searchResults, availableShows);
 
-  return <VideoList videos={results} title={title} />;
+  return <VideoList videos={searchResults.results} title={title} videoLinks />;
 }

@@ -20,10 +20,8 @@ async function request<T>(options: RequestOptions): Promise<T> {
 export async function getSearchResults(searchOptions: SearchOptions): Promise<SearchResults> {
   const params: URLSearchParams = new URLSearchParams();
   params.set("q", searchOptions.q);
-  if (searchOptions.channel) {
-    params.set("channel", searchOptions.channel.toString());
-  } else if (searchOptions.show) {
-    params.set("show", searchOptions.show.toString());
+  if (searchOptions.showSlug) {
+    params.set("show", searchOptions.showSlug.toString());
   }
   return request({
     path: "/search",

@@ -1,27 +1,34 @@
 "use client";
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SearchOptions, SearchResults, Video } from "./types";
+import { SearchOptions, SearchResults, Show, Video } from "./types";
 import { getSearchResults } from "./api-client";
 
-type SearchData = SearchOptions &
-  SearchResults & {
-    loading: boolean;
-    doSearch: (searchTerm: string, show: string) => void;
-  };
+type SearchData = {
+  searchOptions: SearchOptions;
+  searchResults: SearchResults;
+  doSearch: (searchTerm: string, show: string) => void;
+  availableShows: Show[];
+};
 
 const SearchContext = createContext<SearchData>({
-  q: "",
-  show: "",
-  loading: false,
-  results: [],
-  resultsCapped: false,
+  searchOptions: {
+    q: "",
+    showSlug: "",
+  },
+  searchResults: {
+    results: [],
+    resultsCapped: false,
+    loading: false,
+  },
   doSearch: () => {},
+  availableShows: [],
 });
 
 type SearchContextProps = {
   children: ReactNode;
   searchParams: Record<string, string>;
+  availableShows: Show[];
 };
 
 function urlWithQueryParams(q: string, show: string) {
@@ -34,39 +41,45 @@ function urlWithQueryParams(q: string, show: string) {
 }
 
 export function SearchContextProvider(props: SearchContextProps) {
-  const [q, setQ] = useState(props.searchParams.q);
-  const [show, setShow] = useState(props.searchParams.show || "hay-algo-ahi");
-  const [channel, setChannel] = useState(props.searchParams.canal); // TODO
-  const [loading, setLoading] = useState(!!q);
-  const [results, setResults] = useState<Video[]>([]);
-  const [resultsCapped, setResultsCapped] = useState(false);
+  const { searchParams, availableShows, children } = props;
+
+  const [searchOptions, setSearchOptions] = useState<SearchOptions>({
+    q: searchParams.q,
+    showSlug: searchParams.show || "hay-algo-ahi",
+  });
+
+  const [searchResults, setSearchResults] = useState<SearchResults>({
+    results: [],
+    resultsCapped: false,
+    loading: !!searchParams.q,
+  });
+
   const router = useRouter();
 
-  const doSearch = (searchTerm: string, searchShow: string) => {
-    const somethingHasChanged = searchTerm && (searchTerm !== q || searchShow !== show);
+  const doSearch = (q: string, showSlug: string) => {
+    const somethingHasChanged = q && (q !== searchOptions.q || showSlug !== searchOptions.showSlug);
     if (somethingHasChanged) {
-      setQ(searchTerm);
-      setShow(searchShow);
-      const newUrl = urlWithQueryParams(searchTerm, searchShow);
+      setSearchOptions({ q, showSlug });
+      const newUrl = urlWithQueryParams(q, showSlug);
       router.push(newUrl, { scroll: false });
     }
   };
 
   useEffect(() => {
-    if (!q) return;
-    setLoading(true);
-    setResults([]);
-    setResultsCapped(false);
-    getSearchResults({ q, show }).then(async (searchResults) => {
-      setResults(searchResults.results);
-      setResultsCapped(searchResults.resultsCapped);
-      setLoading(false);
+    if (!searchOptions.q) return;
+    setSearchResults({
+      loading: true,
+      results: [],
+      resultsCapped: false,
     });
-  }, [q, show]);
+    getSearchResults(searchOptions).then(async (newSearchResults) => {
+      setSearchResults(newSearchResults);
+    });
+  }, [searchOptions]);
 
   return (
-    <SearchContext.Provider value={{ q, show, channel, results, loading, resultsCapped, doSearch }}>
-      {props.children}
+    <SearchContext.Provider value={{ searchOptions, searchResults, doSearch, availableShows }}>
+      {children}
     </SearchContext.Provider>
   );
 }

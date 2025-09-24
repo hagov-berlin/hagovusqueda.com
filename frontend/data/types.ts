@@ -62,11 +62,12 @@ export type Channel = {
 
 export type SearchOptions = {
   q: string;
-  show: string;
-  channel?: string;
+  showSlug: string;
+  channelSlug?: string;
 };
 
 export type SearchResults = {
+  loading: boolean;
   results: Video[];
   resultsCapped: boolean;
 };

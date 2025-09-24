@@ -17,9 +17,9 @@ export default function FormElement(props: { children: ReactNode }) {
     if (!inputElement || !selectElement) {
       return;
     }
-    const searchTerm = inputElement.value;
-    const show = selectElement.value;
-    doSearch(searchTerm, show);
+    const q = inputElement.value;
+    const showSlug = selectElement.value;
+    doSearch(q, showSlug);
   };
   return (
     <form className={styles.form} onSubmit={onSubmit} ref={formRef}>
