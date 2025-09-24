@@ -1,7 +1,27 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import VideoList from "@/components/video-list";
 import VideoElement from "@/components/video";
 import { getVideo, getVideos } from "@/data/api-client";
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  if (/^\d+$/.test(slug)) {
+    const page = parseInt(slug, 10);
+    return { title: `HAGOVusqueda - Videos pagina ${page}` };
+  }
+
+  const videoId = slug.slice(-11);
+  const video = await getVideo(videoId);
+
+  if (!video) {
+    return { title: "HAGOVusqueda - Video no encontrado" };
+  }
+
+  return {
+    title: `HAGOVusqueda - ${video.title}`,
+  };
+}
 
 async function Video(props: { videoId: string; slug: string }) {
   const video = await getVideo(props.videoId);

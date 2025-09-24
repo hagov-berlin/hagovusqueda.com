@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import VideoList from "@/components/video-list";
 import { getVideos } from "@/data/api-client";
 
@@ -7,3 +8,7 @@ export default async function Videos() {
 
   return <VideoList videos={videos} pagination={pagination} videoLinks />;
 }
+
+export const metadata: Metadata = {
+  title: "HAGOVusqueda - Videos",
+};
