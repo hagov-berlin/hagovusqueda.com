@@ -31,6 +31,9 @@ export async function videos(req: FastifyRequest) {
 
   const filters: Prisma.YoutubeVideoWhereInput = {
     ignored: false,
+    transcript: {
+      not: null,
+    },
   };
 
   if (show.length == 1) {

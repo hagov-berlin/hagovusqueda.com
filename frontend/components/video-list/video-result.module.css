@@ -12,8 +12,25 @@
   display: flex;
   gap: 12px;
 
+  text-decoration: none;
+  color: inherit;
+
   @media (max-width: 628px) {
     flex-direction: column;
+  }
+}
+
+a.videoResultHeader {
+  border: solid 1px #ccc;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+a.videoResultHeader:hover,
+a.videoResultHeader:focus-within {
+  outline: solid 1px #c518de;
+  @media (max-width: 628px) {
+    outline-offset: 10px;
   }
 }
 
@@ -22,15 +39,28 @@
   flex-direction: column;
   justify-content: center;
   margin-right: auto;
+  gap: 1em;
 }
 
 .videoResultTitle {
   display: inline;
 }
 
+.videoResultChannelDate {
+  white-space: nowrap;
+}
+
+.videoLink button {
+  @media (max-width: 628px) {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 .videoThumbnail {
   width: auto;
   height: 140px;
+  aspect-ratio: 16 / 9;
   border-radius: 4px;
 
   @media (max-width: 628px) {

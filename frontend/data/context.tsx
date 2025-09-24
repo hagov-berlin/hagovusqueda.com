@@ -27,7 +27,9 @@ type SearchContextProps = {
 function urlWithQueryParams(q: string, show: string) {
   const params = new URLSearchParams();
   params.set("q", q);
-  params.set("show", show);
+  if (show) {
+    params.set("show", show);
+  }
   return `${window.location.pathname}?${params.toString()}`;
 }
 
@@ -41,10 +43,13 @@ export function SearchContextProvider(props: SearchContextProps) {
   const router = useRouter();
 
   const doSearch = (searchTerm: string, searchShow: string) => {
-    setQ(searchTerm);
-    setShow(searchShow);
-    const newUrl = urlWithQueryParams(searchTerm, searchShow);
-    router.push(newUrl, { scroll: false });
+    const somethingHasChanged = searchTerm && (searchTerm !== q || searchShow !== show);
+    if (somethingHasChanged) {
+      setQ(searchTerm);
+      setShow(searchShow);
+      const newUrl = urlWithQueryParams(searchTerm, searchShow);
+      router.push(newUrl, { scroll: false });
+    }
   };
 
   useEffect(() => {

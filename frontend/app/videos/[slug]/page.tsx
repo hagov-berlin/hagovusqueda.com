@@ -1,27 +1,27 @@
-import { notFound } from "next/navigation";
-import Container from "@/components/container";
+import { notFound, redirect } from "next/navigation";
 import VideoList from "@/components/video-list";
+import VideoElement from "@/components/video";
 import { getVideo, getVideos } from "@/data/api-client";
 
-async function Video(props: { videoId: string }) {
+async function Video(props: { videoId: string; slug: string }) {
   const video = await getVideo(props.videoId);
 
   if (!video) {
     notFound();
   }
 
-  return <Container>{video.title}</Container>;
+  if (props.slug !== `${video.slug}-${video.youtubeId}`) {
+    redirect(`/videos/${video.slug}-${video.youtubeId}`);
+  }
+
+  return <VideoElement video={video} />;
 }
 
 async function Videos(props: { page: number }) {
   // TODO: duplicated component with app/videos/page.tsx
   const [videos, pagination] = await getVideos(props.page);
 
-  return (
-    <Container>
-      <VideoList videos={videos} pagination={pagination} />
-    </Container>
-  );
+  return <VideoList videos={videos} pagination={pagination} videoLinks />;
 }
 
 type PageProps = {
@@ -36,5 +36,5 @@ export default async function VideoOrPaginatedVideos({ params }: PageProps) {
   }
 
   const videoId = slug.slice(-11);
-  return <Video videoId={videoId} />;
+  return <Video videoId={videoId} slug={slug} />;
 }

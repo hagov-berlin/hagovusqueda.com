@@ -3,38 +3,8 @@ import { useState } from "react";
 import { Subtitle } from "@/data/types";
 import styles from "./subtitle-result.module.css";
 import Button from "../common/button";
-
-function secondsToTime(milisecondsNumber: number) {
-  const cleanedSeconds = Math.max(0, milisecondsNumber / 1000);
-  const hoursString = Math.floor(cleanedSeconds / 60 / 60)
-    .toString()
-    .padStart(2, "0");
-  const minutesString = Math.floor((cleanedSeconds % (60 * 60)) / 60)
-    .toString()
-    .padStart(2, "0");
-  const secondsString = Math.floor(cleanedSeconds % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${hoursString}:${minutesString}:${secondsString}`;
-}
-
-type YoutubeIframeProps = {
-  videoId: string;
-  start: number;
-};
-
-function YoutubeIframe(props: YoutubeIframeProps) {
-  return (
-    <iframe
-      className={styles.resultIframe}
-      width="640"
-      height="360"
-      allow="autoplay"
-      src={`https://www.youtube.com/embed/${props.videoId}?start=${props.start}&autoplay=1&`}
-      frameBorder="0"
-    ></iframe>
-  );
-}
+import YoutubeIframe from "../video/youtube-iframe";
+import { secondsToTime } from "../video/utils";
 
 type SubtitleProps = {
   videoId: string;
@@ -57,7 +27,7 @@ export function SubtitleResult(props: SubtitleProps) {
         </div>
         {expanded ? null : <Button>VER</Button>}
       </div>
-      {expanded && <YoutubeIframe videoId={props.videoId} start={startSeconds} />}
+      {expanded && <YoutubeIframe videoId={props.videoId} start={startSeconds} autoplay />}
     </div>
   );
 }

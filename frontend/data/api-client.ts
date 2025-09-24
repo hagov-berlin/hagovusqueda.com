@@ -69,6 +69,6 @@ export async function getVideos(page?: number): Promise<PaginatedVideos> {
 
 export async function getVideo(videoId: string): Promise<Video> {
   return request({
-    path: `/video/${videoId}`,
+    path: `/videos/${videoId}`,
   });
 }

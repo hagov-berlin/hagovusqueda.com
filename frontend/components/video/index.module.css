@@ -1,0 +1,13 @@
+.subtitlesContainer {
+  padding: 32px 0;
+}
+
+.subtitleRow {
+  display: flex;
+  gap: 1em;
+}
+
+.subtitleTime {
+  font-family: var(--font-geist-mono);
+  color: #777;
+}

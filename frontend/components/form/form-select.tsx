@@ -12,6 +12,7 @@ export default function FormSelect(props: { shows: Show[] }) {
     <div className={`${styles.advancedOptions}  ${styles.showSelect}`}>
       <label>Buscar en</label>
       <select disabled={loading} defaultValue={show} id="hagovusqueda-search-select">
+        <option value="">Todo</option>
         {sortedShows.map((show) => {
           return (
             <option key={show.slug} value={show.slug}>
