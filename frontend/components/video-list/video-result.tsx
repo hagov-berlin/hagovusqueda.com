@@ -41,11 +41,11 @@ export default function VideoResult(props: ResultProps) {
               {result.channel.name} {" - "} {parseDate(result.date)}
             </span>
           </div>
-          {videoLink ? (
-            <div className={styles.videoLink}>
-              <Button>Ver transcripción</Button>
-            </div>
-          ) : null}
+          <div className={styles.videoLink}>
+            <Button href={videoLink ? undefined : `/videos/${result.slug}-${result.youtubeId}`}>
+              Ver transcripción
+            </Button>
+          </div>
         </div>
       </VideoContainer>
       {result.subtitles?.map((subtitle, index) => (

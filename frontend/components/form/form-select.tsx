@@ -15,7 +15,7 @@ export default function FormSelect() {
         defaultValue={searchOptions.showSlug}
         id="hagovusqueda-search-select"
       >
-        <option value="">Todo</option>
+        <option value="todo">Todo</option>
         {sortedShows.map((show) => {
           return (
             <option key={show.slug} value={show.slug}>

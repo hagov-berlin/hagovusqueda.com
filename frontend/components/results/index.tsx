@@ -10,5 +10,5 @@ export default function Results() {
 
   const title = getTitle(searchOptions, searchResults, availableShows);
 
-  return <VideoList videos={searchResults.results} title={title} videoLinks />;
+  return <VideoList videos={searchResults.results} title={title} />;
 }
