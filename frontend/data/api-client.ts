@@ -7,7 +7,10 @@ type RequestOptions = {
   params?: URLSearchParams;
 };
 
-const baseUrl = process.env.INTERNAL_BASE_API_PATH || process.env.NEXT_PUBLIC_BASE_API_PATH;
+const baseUrl =
+  process.env.INTERNAL_BASE_API_PATH ||
+  process.env.NEXT_PUBLIC_BASE_API_PATH ||
+  "https://api.hagovusqueda.com";
 
 async function request<T>(options: RequestOptions): Promise<T> {
   const url = options.params
