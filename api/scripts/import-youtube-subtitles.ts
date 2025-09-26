@@ -17,10 +17,13 @@ async function checkVideo(prisma: PrismaClient, video: YoutubeVideo) {
   };
 }
 
-async function getVideosThatSouldBeUpdated(prisma: PrismaClient) {
+async function getVideosThatShouldBeUpdated(prisma: PrismaClient) {
   const videos = await prisma.youtubeVideo.findMany({
     where: {
       ignored: false,
+    },
+    orderBy: {
+      date: "desc",
     },
   });
 
@@ -40,7 +43,7 @@ async function getVideosThatSouldBeUpdated(prisma: PrismaClient) {
 }
 
 export async function importYoutubeSubtitles(prisma: PrismaClient) {
-  const videos = await getVideosThatSouldBeUpdated(prisma);
+  const videos = await getVideosThatShouldBeUpdated(prisma);
 
   console.log(`Found ${videos.length} videos`);
 
