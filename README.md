@@ -88,11 +88,7 @@ scp dump_local.backup root@hagovusqueda:/root/
 
 # SSH into dropplet
 # Update the codebase/migrate if needed (see deployment section)
+docker-compose exec db dropdb -f --username=postgres_hagov_db_user hagovusqueda
+docker-compose exec db createdb --username=postgres_hagov_db_user hagovusqueda
 cat dump_local.backup | docker exec -i <container_id> pg_restore -U postgres_hagov_db_user -d hagovusqueda --no-owner
-```
-
-## Data import
-
-```sh
-docker-compose exec api npm run import-data
 ```
