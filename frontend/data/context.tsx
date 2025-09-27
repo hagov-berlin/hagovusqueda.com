@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SearchOptions, SearchResults, Show, Video } from "./types";
+import { SearchOptions, SearchResults, Show } from "./types";
 import { getSearchResults } from "./api-client";
 
 type SearchData = {
@@ -59,19 +59,22 @@ export function SearchContextProvider(props: SearchContextProps) {
   const doSearch = (q: string, showSlug: string) => {
     const somethingHasChanged = q && (q !== searchOptions.q || showSlug !== searchOptions.showSlug);
     if (somethingHasChanged) {
-      setSearchOptions({ q, showSlug });
       const newUrl = urlWithQueryParams(q, showSlug);
       router.push(newUrl, { scroll: false });
     }
   };
 
   useEffect(() => {
-    if (!searchOptions.q) return;
+    setSearchOptions({ q: searchParams.q, showSlug: searchParams.show });
     setSearchResults({
-      loading: true,
+      loading: !!searchParams.q,
       results: [],
       resultsCapped: false,
     });
+  }, [searchParams.q, searchParams.show]);
+
+  useEffect(() => {
+    if (!searchOptions.q) return;
     getSearchResults(searchOptions).then(async (newSearchResults) => {
       setSearchResults(newSearchResults);
     });
