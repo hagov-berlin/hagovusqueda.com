@@ -6,6 +6,7 @@ import { channels, channel } from "./channel";
 import { shows, show } from "./show";
 import { videos, video } from "./video";
 import search from "./search";
+import stats from "./stats";
 
 const fastify = Fastify({ logger: true });
 
@@ -30,6 +31,8 @@ fastify.get("/videos", videos);
 fastify.get("/videos/:id", video);
 
 fastify.get("/search", search);
+
+fastify.get("/stats", stats);
 
 const start = async () => {
   const port = 3001;

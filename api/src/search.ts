@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import prisma from "./db";
-import { Show, Subtitle } from "@prisma/client";
+import { Show } from "@prisma/client";
 import { parseQuery } from "./utils";
 
 async function getVideoIdsFromPostgresTextSearch(

@@ -71,3 +71,8 @@ export type SearchResults = {
   results: Video[];
   resultsCapped: boolean;
 };
+
+export type Stats = {
+  videoCount: number;
+  showCount: number;
+};

@@ -1,4 +1,4 @@
-import { Channel, Pagination, SearchOptions, SearchResults, Show, Video } from "./types";
+import { Channel, Pagination, SearchOptions, SearchResults, Show, Video, Stats } from "./types";
 
 type PaginatedVideos = [Video[], Pagination];
 
@@ -71,5 +71,11 @@ export async function getVideos(page?: number): Promise<PaginatedVideos> {
 export async function getVideo(videoId: string): Promise<Video> {
   return request({
     path: `/videos/${videoId}`,
+  });
+}
+
+export async function getStats(): Promise<Stats> {
+  return request({
+    path: `/stats`,
   });
 }
