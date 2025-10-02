@@ -28,10 +28,7 @@ a.videoResultHeader {
 
 a.videoResultHeader:hover,
 a.videoResultHeader:focus-within {
-  outline: solid 1px #c518de;
-  @media (max-width: 628px) {
-    outline-offset: 10px;
-  }
+  border-color: #c518de;
 }
 
 .videoResultTitleContainer {
