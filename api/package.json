@@ -5,7 +5,7 @@
     "build": "tsc",
     "start": "node dist/src/index.js",
     "prisma-generate": "dotenv -e ../.env prisma generate",
-    "import-data": "dotenv -e ../.env ts-node scripts/import.ts"
+    "import-data": "dotenv -e ../.env.import ts-node scripts/import.ts"
   },
   "license": "ISC",
   "type": "commonjs",

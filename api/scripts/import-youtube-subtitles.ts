@@ -2,13 +2,13 @@ import { PrismaClient, YoutubeVideo } from "@prisma/client";
 import { getSubtitlesForVideo, Subtitle } from "./utils/youtube-subtitles-client";
 
 async function checkVideo(prisma: PrismaClient, video: YoutubeVideo) {
-  const subtitleCount = await prisma.subtitle.count({
+  const subtitle = await prisma.subtitle.findFirst({
     where: {
       videoId: video.id,
     },
   });
   const missingTranscript = !video.transcript || video.transcript.length === 0;
-  const missingSubtitles = subtitleCount === 0;
+  const missingSubtitles = !subtitle;
   const shouldBeUpdated = missingTranscript || missingSubtitles;
   return {
     missingTranscript,
@@ -21,10 +21,12 @@ async function getVideosThatShouldBeUpdated(prisma: PrismaClient) {
   const videos = await prisma.youtubeVideo.findMany({
     where: {
       ignored: false,
+      transcript: null,
     },
     orderBy: {
       date: "desc",
     },
+    take: 500,
   });
 
   let videosThatShouldBeUpdated: YoutubeVideo[] = [];
