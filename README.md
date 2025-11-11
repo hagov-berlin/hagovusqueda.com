@@ -1,104 +1,35 @@
 # hagovusqueda.com
 
+## System requirements
+
+- Docker and Docker Compose
+
 ## Initial setup
 
+1. Copy and configure the necessary env vars
+
 ```sh
-# Configure .env file
 cp .env.example .env
 nano .env
+```
 
-# Configure docker-compose.override
+2. Only for dev: copy the local override of the docker compose config
+```sh
 cp docker-compose.override.example.yml docker-compose.override.yml
 ```
 
 ## Running the project
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
-## Development
+## DB seed
 
 ```sh
-# When changing the schema run:
-docker-compose exec api npx prisma migrate dev -n MIGRATION_NAME
+# Restart db
+docker compose exec api npx prisma migrate reset
 
-# When in need of a clean db:
-docker-compose exec api npx prisma migrate reset
-
-# To regenerate the client types
-npx prisma generate
-```
-
-## Dropplet
-
-### Initial setup
-
-```sh
-# Install docker and enable it as a service
-apt install -y docker.io docker-compose
-systemctl enable docker
-
-# Generate SSH Key and add it to Github
-ssh-keygen -t ed25519 -C "ignacio.nh@gmail.com"
-cat .ssh/id_ed25519.pub
-
-# Clone project
-git clone git@github.com:hagov-berlin/api.hagovusqueda.com.git
-cd api.hagovusqueda.com/
-
-# Configure .env file
-cp .env.example .env
-nano .env
-
-# Run the compose daemon
-docker-compose up -d --build
-```
-
-### Deployment
-
-```sh
-# Update the repo
-git pull
-
-# Bring all down
-docker compose down
-
-# Rebuild
-docker compose up --build -d
-
-# Run db migrations
-docker-compose exec api npx prisma migrate deploy
-```
-
-## DB dump and restore
-
-```sh
-# Get into your running docker db via
-docker-compose exec db bash
-
-# Generate a dump
-pg_dump -U postgres -h localhost -p 5432 --no-owner --no-privileges -Fc -d appdb > /dump_local.backup
-
-# Get out of the container and copy the file to the host
-docker cp <container_id>:/dump_local.backup dump_local.backup
-
-# Copy the file to the dropplet
-scp dump_local.backup root@hagovusqueda:/root/
-
-# SSH into dropplet
-# Update the codebase/migrate if needed (see deployment section)
-docker-compose exec db dropdb -f --username=postgres_hagov_db_user hagovusqueda
-docker-compose exec db createdb --username=postgres_hagov_db_user hagovusqueda
-cat dump_local.backup | docker exec -i <container_id> pg_restore -U postgres_hagov_db_user -d hagovusqueda --no-owner
-```
-
-## Daily scripts
-
-```sh
-# Leave running an ssh tunnel
-ssh -v -L 5432:localhost:5432 root@hagovusqueda
-
-cd api/
-npm run npm run import-data
+# Seed data
+docker compose exec api npm run seed-data
 ```
