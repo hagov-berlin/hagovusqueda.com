@@ -8,7 +8,7 @@ http {
 
   server {
     listen 80;
-    server_name api.hagovusqueda.com;
+    server_name ${SERVER_NAME_API};
 
     location / {
       proxy_pass http://api:3001;
@@ -21,7 +21,7 @@ http {
 
   server {
     listen 80;
-    server_name hagovusqueda.com;
+    server_name ${SERVER_NAME_FRONT};
 
     location / {
       proxy_pass http://frontend:3000;
@@ -34,7 +34,7 @@ http {
 
   server {
     listen 80;
-    server_name adminer.hagovusqueda.com;
+    server_name ${SERVER_NAME_ADMINER};
 
     location / {
       proxy_pass http://adminer:8080;
