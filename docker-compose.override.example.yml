@@ -1,7 +1,7 @@
 # docker-compose.override.yml
 services:
   api:
-    command: npm run dev
+    command: sh -c "/usr/sbin/crond -f -l 8 & npm run dev"
     volumes:
       - ./api:/app
       - /app/node_modules
