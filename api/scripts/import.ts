@@ -1,26 +1,31 @@
 import { PrismaClient } from "@prisma/client";
 import { importYoutubePlaylist } from "./import-youtube-playlist";
 import { importYoutubeSubtitles } from "./import-youtube-subtitles";
+import logger from "./utils/logger";
 
 const prisma = new PrismaClient();
 
 class PlaylistSyncJob {
   async start() {
-    console.log("Starting playlist job");
+    logger.info("Starting playlist job");
     const playlists = await prisma.youtubePlaylist.findMany();
-    console.log(`Found ${playlists.length} playlists`);
+    logger.debug(`Found ${playlists.length} playlists`);
+
     for (const playlist of playlists) {
       const show = await prisma.show.findFirst({ where: { id: playlist.showId } });
-      console.log(`Updating from playlist ${show.name} ${playlist.id}`);
-      // await importYoutubePlaylist(prisma, playlist, 50);
+      logger.debug(`Updating from playlist ${show.name} ${playlist.youtubeId}`);
+      const fetchLimit = 50;
+      await importYoutubePlaylist(prisma, playlist, fetchLimit);
     }
+    logger.info("Playlist job ended");
   }
 }
 
 class SubtitlesSyncJob {
   async start() {
-    console.log("Starting subtitles job");
+    logger.info("Starting subtitles job");
     // await importYoutubeSubtitles(prisma);
+    logger.info("Subtitles job ended");
   }
 }
 

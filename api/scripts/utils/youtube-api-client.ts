@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
-import path from "path";
-
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+import logger from "./logger";
 
 const durationRegex = /PT((\d+)H)?((\d+)M)?((\d+)S)?/;
 
@@ -36,6 +33,9 @@ type PlaylistItem = {
       videoId: string;
     };
   };
+  contentDetails: {
+    videoPublishedAt: string;
+  };
 };
 
 type VideoDetail = {
@@ -65,44 +65,50 @@ export async function request(
   if (pageToken) {
     url = `${url}&pageToken=${pageToken}`;
   }
+  logger.debug(`Requesting ${url}`);
   const response = await fetch(url);
   const { items, nextPageToken } = await response.json();
 
   const ids = items.map((item: PlaylistItem) => item.snippet.resourceId.videoId).join(",");
   const detailUrl = `${baseApiPath}/videos?key=${youtubeApiKey}&id=${ids}&part=contentDetails,liveStreamingDetails`;
+  logger.debug(`Requesting ${detailUrl}`);
   const detailResponse = await fetch(detailUrl);
   const detailJson: { items: VideoDetail[] } = await detailResponse.json();
 
-  console.log(`Got ${items.length} results from youtube`);
-
+  logger.debug(`Got ${items.length} results from youtube`);
   return {
     nextPageToken,
-    videos: items.map((item: PlaylistItem, index: number) => {
-      const detail = detailJson.items.find(
-        (detailItem) => detailItem.id === item.snippet.resourceId.videoId
-      );
-      if (!detail) console.log("Missing detail for", item.snippet.resourceId.videoId);
-      const durationString = detail?.contentDetails.duration;
-      return {
-        videoId: item.snippet.resourceId.videoId,
-        title: item.snippet.title,
-        date: detail?.liveStreamingDetails?.actualStartTime || item.snippet.publishedAt,
-        duration: isValidDuration(durationString) ? getDurationInSeconds(durationString) : 0,
-      };
-    }),
+    videos: items
+      .map((item: PlaylistItem, index: number) => {
+        const detail = detailJson.items.find(
+          (detailItem) => detailItem.id === item.snippet.resourceId.videoId
+        );
+        if (!detail && item.contentDetails.videoPublishedAt) {
+          logger.warn("Missing detail for", item.snippet.resourceId.videoId);
+        }
+        const durationString = detail?.contentDetails.duration;
+        return {
+          videoId: item.snippet.resourceId.videoId,
+          title: item.snippet.title,
+          date: detail?.liveStreamingDetails?.actualStartTime || item.snippet.publishedAt,
+          duration: isValidDuration(durationString) ? getDurationInSeconds(durationString) : 0,
+          private: !detail && !item.contentDetails.videoPublishedAt,
+        };
+      })
+      .filter((item) => !item.private),
   };
 }
 
 export async function getWholePlaylist(playlistId: string, limit = 1000) {
   let count = 1;
   let allVideos: YoutubeVideo[] = [];
-  console.log(`Requesting initial page ${count} for playlist ${playlistId}`);
+  logger.debug(`Requesting initial page ${count} for playlist ${playlistId}`);
   const { videos: newVideos, nextPageToken } = await request(playlistId);
   allVideos = [...allVideos, ...newVideos];
   let pageToken = nextPageToken;
   while (pageToken && allVideos.length < limit) {
     count += 1;
-    console.log(`Requesting initial page ${count} ${pageToken}`);
+    logger.debug(`Requesting initial page ${count} ${pageToken}`);
     const { videos: newVideos, nextPageToken } = await request(playlistId, pageToken);
     allVideos = [...allVideos, ...newVideos];
     pageToken = nextPageToken;
