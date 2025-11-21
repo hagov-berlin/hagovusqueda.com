@@ -1,2 +1,3 @@
 #Mins   Hours   Days    Months    Weekday   Command
-*       */2       *       *         *         npm run --prefix /app import-data >> /app/cronjob.log 2>&1
+0       */2     *       *         *         npm run --prefix /app fetch-youtube-playlists >> /app/scripts/fetch-youtube-playlists.log 2>&1
+*       *       *       *         *         npm run --prefix /app fetch-youtube-subtitles >> /app/scripts/fetch-youtube-subtitles.log 2>&1

@@ -5,7 +5,8 @@
     "build": "tsc",
     "start": "node dist/src/index.js",
     "prisma-generate": "dotenv -e ../.env prisma generate",
-    "import-data": "dotenv -e ../.env ts-node scripts/import.ts",
+    "fetch-youtube-playlists": "dotenv -e ../.env ts-node scripts/fetch-youtube-playlists.ts",
+    "fetch-youtube-subtitles": "dotenv -e ../.env ts-node scripts/fetch-youtube-subtitles.ts",
     "seed-data": "dotenv -e ../.env ts-node scripts/seed.ts"
   },
   "license": "ISC",

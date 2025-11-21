@@ -5,6 +5,7 @@ services:
     volumes:
       - ./api:/app
       - /app/node_modules
+      - ./api/crontab:/var/spool/cron/crontabs/root:ro
 
   frontend:
     command: npm run dev

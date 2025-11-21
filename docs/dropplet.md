@@ -62,15 +62,3 @@ docker-compose exec db dropdb -f --username=postgres_hagov_db_user hagovusqueda
 docker-compose exec db createdb --username=postgres_hagov_db_user hagovusqueda
 cat dump_local.backup | docker exec -i <container_id> pg_restore -U postgres_hagov_db_user -d hagovusqueda --no-owner
 ```
-
-## Daily scripts
-
-TODO: update this
-
-```sh
-# Leave running an ssh tunnel
-ssh -v -L 5432:localhost:5432 root@hagovusqueda
-
-cd api/
-npm run import-data
-```

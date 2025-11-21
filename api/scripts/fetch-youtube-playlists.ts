@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { importYoutubePlaylist } from "./import-youtube-playlist";
-import { importYoutubeSubtitles } from "./import-youtube-subtitles";
 import logger from "./utils/logger";
 
 const prisma = new PrismaClient();
@@ -21,20 +20,9 @@ class PlaylistSyncJob {
   }
 }
 
-class SubtitlesSyncJob {
-  async start() {
-    logger.info("Starting subtitles job");
-    // await importYoutubeSubtitles(prisma);
-    logger.info("Subtitles job ended");
-  }
-}
-
 async function main() {
   const playlistJob = new PlaylistSyncJob();
   playlistJob.start();
-
-  const subtitlesJob = new SubtitlesSyncJob();
-  subtitlesJob.start();
 }
 
 main()
