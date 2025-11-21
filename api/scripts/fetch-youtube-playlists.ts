@@ -1,28 +1,39 @@
 import { PrismaClient } from "@prisma/client";
-import { importYoutubePlaylist } from "./import-youtube-playlist";
 import logger from "./utils/logger";
+import { upsertVideo, videoAlreadyExists, deleteVideo } from "./utils/db/video";
+import getVideosFromPlaylist from "./utils/youtube-api/get-videos-from-playlist";
 
 const prisma = new PrismaClient();
 
-class PlaylistSyncJob {
-  async start() {
-    logger.info("Starting playlist job");
-    const playlists = await prisma.youtubePlaylist.findMany();
-    logger.debug(`Found ${playlists.length} playlists`);
-
-    for (const playlist of playlists) {
-      const show = await prisma.show.findFirst({ where: { id: playlist.showId } });
-      logger.debug(`Updating from playlist ${show.name} ${playlist.youtubeId}`);
-      const fetchLimit = 50;
-      await importYoutubePlaylist(prisma, playlist, fetchLimit);
-    }
-    logger.info("Playlist job ended");
-  }
-}
-
 async function main() {
-  const playlistJob = new PlaylistSyncJob();
-  playlistJob.start();
+  logger.info("Starting playlist job");
+  const playlists = await prisma.youtubePlaylist.findMany();
+  logger.debug(`Found ${playlists.length} playlists`);
+
+  for (const playlist of playlists) {
+    const show = await prisma.show.findFirst({ where: { id: playlist.showId } });
+    logger.debug(`Updating from playlist ${show.name} ${playlist.youtubeId}`);
+
+    const fetchLimit = 50;
+    const videos = await getVideosFromPlaylist(playlist, fetchLimit);
+
+    for (const video of videos) {
+      const alreadyExists = await videoAlreadyExists(video.videoId);
+      if (alreadyExists && video.private) {
+        logger.info(`Removing video ${video.videoId}`);
+        await deleteVideo(video.videoId);
+      } else if (!video.private) {
+        if (alreadyExists) {
+          logger.debug(`Updating video ${video.videoId}`);
+        } else {
+          logger.info(`New video ${video.videoId}`);
+        }
+        await upsertVideo(playlist, video);
+      }
+    }
+  }
+
+  logger.info("Playlist job ended");
 }
 
 main()
