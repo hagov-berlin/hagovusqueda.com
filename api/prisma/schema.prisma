@@ -29,13 +29,14 @@ model YoutubeChannel {
 }
 
 model Show {
-  id        Int               @id @default(autoincrement())
-  name      String
-  slug      String
-  channelId Int
-  channel   YoutubeChannel    @relation(fields: [channelId], references: [id])
-  playlists YoutubePlaylist[]
-  videos    YoutubeVideo[]
+  id          Int               @id @default(autoincrement())
+  name        String
+  slug        String
+  channelId   Int
+  channel     YoutubeChannel    @relation(fields: [channelId], references: [id])
+  playlists   YoutubePlaylist[]
+  videos      YoutubeVideo[]
+  transcripts Transcript[]
 
   @@unique([slug])
   @@index([slug])
@@ -65,7 +66,7 @@ model YoutubeVideo {
   durationSec Int
   date        DateTime
   subtitles   Subtitle[]
-  transcript  String?
+  transcripts Transcript[]
   ignored     Boolean?
 
   @@unique([youtubeId])
@@ -76,6 +77,23 @@ model YoutubeVideo {
   @@index([youtubeId])
 }
 
+model Transcript {
+  id Int @id @default(autoincrement())
+
+  videoId Int
+  video   YoutubeVideo @relation(fields: [videoId], references: [id])
+  showId  Int
+  show    Show         @relation(fields: [showId], references: [id])
+
+  type String
+  text String
+  srt  String
+
+  @@index([videoId])
+  @@index([type])
+  @@index([videoId, type])
+}
+
 model Subtitle {
   id          Int          @id @default(autoincrement())
   order       Int
@@ -84,6 +102,7 @@ model Subtitle {
   text        String
   video       YoutubeVideo @relation(fields: [videoId], references: [id])
   videoId     Int
+  type        String
 
   @@index([videoId])
   @@index([order])
