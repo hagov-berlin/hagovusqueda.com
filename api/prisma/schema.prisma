@@ -89,6 +89,7 @@ model Transcript {
   text String
   srt  String
 
+  @@unique([videoId, type], name: "video_id_type")
   @@index([videoId])
   @@index([type])
   @@index([videoId, type])

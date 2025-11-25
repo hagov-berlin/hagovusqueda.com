@@ -1,17 +1,15 @@
-import { PrismaClient } from "@prisma/client";
 import logger from "./utils/logger";
 import { upsertVideo, videoAlreadyExists, deleteVideo } from "./utils/db/video";
 import getVideosFromPlaylist from "./utils/youtube-api/get-videos-from-playlist";
-
-const prisma = new PrismaClient();
+import prismaClient from "./utils/db/prisma-client";
 
 async function main() {
   logger.info("Starting playlist job");
-  const playlists = await prisma.youtubePlaylist.findMany();
+  const playlists = await prismaClient.youtubePlaylist.findMany();
   logger.debug(`Found ${playlists.length} playlists`);
 
   for (const playlist of playlists) {
-    const show = await prisma.show.findFirst({ where: { id: playlist.showId } });
+    const show = await prismaClient.show.findFirst({ where: { id: playlist.showId } });
     logger.debug(`Updating from playlist ${show.name} ${playlist.youtubeId}`);
 
     const fetchLimit = 50;
@@ -36,6 +34,4 @@ async function main() {
   logger.info("Playlist job ended");
 }
 
-main()
-  .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());
+main().catch((e) => console.error(e));

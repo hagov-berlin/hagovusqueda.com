@@ -32,7 +32,21 @@ export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideo
 }
 
 export async function deleteVideo(videoId: string) {
+  // TODO: also remove transcript and subtitles if they already exist
   await prismaClient.youtubeVideo.delete({
     where: { youtubeId: videoId },
+  });
+}
+
+export async function getVideoWithMissingSubtitles(limit: number) {
+  return prismaClient.youtubeVideo.findMany({
+    where: {
+      transcripts: { none: {} },
+      durationSec: { gt: 0 },
+    },
+    orderBy: {
+      date: "desc",
+    },
+    take: limit,
   });
 }

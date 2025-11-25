@@ -10,6 +10,8 @@ RUN npx prisma generate
 
 RUN npm run build  
 
+RUN apk -U add yt-dlp
+
 COPY crontab /var/spool/cron/crontabs/root
 
 CMD ["sh", "-c", "/usr/sbin/crond -f -l 8 & npm run start"]
