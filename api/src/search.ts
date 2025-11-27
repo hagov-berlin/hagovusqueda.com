@@ -9,27 +9,28 @@ async function getVideoIdsFromPostgresTextSearch(
   limit: number = 1000
 ) {
   let sqlQuery = `
-    SELECT v."youtubeId"
-    FROM "YoutubeVideo" v
-    WHERE to_tsvector('spanish', v.transcript) @@ plainto_tsquery('spanish', $1)
+    SELECT t."videoId"
+    FROM "Transcript" t
+    WHERE to_tsvector('spanish', t.text) @@ plainto_tsquery('spanish', $1)
   `;
 
   const params: [string, number[]?] = [q];
 
   if (showIds.length > 0) {
-    sqlQuery += ` AND v."showId" = ANY($2::int[])`;
+    sqlQuery += ` AND t."showId" = ANY($2::int[])`;
     params.push(showIds);
   }
-  sqlQuery += ` ORDER BY v.date DESC LIMIT ${limit};`;
+  // sqlQuery += ` ORDER BY v.date DESC LIMIT ${limit};`;
+  sqlQuery += ` LIMIT ${limit};`;
 
-  const results: { youtubeId: string }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
-  return results.map((result) => result.youtubeId);
+  const results: { videoId: number }[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
+  return results.map((result) => result.videoId);
 }
 
-function getVideosWithSubtitles(videoIds: string[]) {
+function getVideosWithSubtitles(videoIds: number[]) {
   return prisma.youtubeVideo.findMany({
     where: {
-      youtubeId: { in: videoIds },
+      id: { in: videoIds },
     },
     include: {
       subtitles: { orderBy: { order: "asc" }, omit: { id: true, videoId: true } },
@@ -37,7 +38,6 @@ function getVideosWithSubtitles(videoIds: string[]) {
       channel: { select: { name: true, slug: true, youtubeId: true } },
     },
     omit: {
-      transcript: true,
       id: true,
       showId: true,
       channelId: true,
