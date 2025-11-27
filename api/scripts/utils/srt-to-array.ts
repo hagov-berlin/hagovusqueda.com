@@ -11,6 +11,8 @@ function timeToSeconds(rawTimeString: string) {
 
 export type Subtitle = [string, number, number];
 
+const oneWholeDayInMs = 1000 * 60 * 60 * 24;
+
 export default function srtToArray(subtitleContent: string): Subtitle[] {
   const subtitlesRaw = subtitleContent.split("\n\n").filter((line) => line);
   const subtitleArray: Subtitle[] = [];
@@ -21,5 +23,16 @@ export default function srtToArray(subtitleContent: string): Subtitle[] {
     const text = lines.slice(2).join(" ");
     subtitleArray.push([text, timeToSeconds(startTime), timeToSeconds(endTime)]);
   }
-  return subtitleArray;
+  const filteredSubtitleArray = subtitleArray.filter((subtitle, index) => {
+    const nextSubtitle = subtitleArray[index + 1];
+    const nextSubtitleIsTheSame =
+      subtitle[0] === nextSubtitle?.[0] &&
+      subtitle[1] === nextSubtitle?.[1] &&
+      subtitle[2] === nextSubtitle?.[2];
+    if (nextSubtitleIsTheSame) return false;
+    const firstTimestampIsOk = 0 <= subtitle[1] && subtitle[1] <= oneWholeDayInMs;
+    const secondTimestampIsOk = 0 <= subtitle[2] && subtitle[2] <= oneWholeDayInMs;
+    return firstTimestampIsOk && secondTimestampIsOk;
+  });
+  return filteredSubtitleArray;
 }

@@ -39,6 +39,13 @@ export async function deleteVideo(videoId: string) {
 }
 
 export async function getVideoWithMissingSubtitles(limit: number) {
+  const total = await prismaClient.youtubeVideo.count({
+    where: {
+      transcripts: { none: {} },
+      durationSec: { gt: 0 },
+    },
+  });
+
   return prismaClient.youtubeVideo.findMany({
     where: {
       transcripts: { none: {} },

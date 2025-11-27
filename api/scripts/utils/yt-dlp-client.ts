@@ -21,8 +21,12 @@ export async function downloadSubtitles(videoId: string) {
     };
   }
 
-  logger.debug(stdout);
-  logger.error(stderr);
+  if (stdout.length > 0) {
+    logger.error(stdout);
+  }
+  if (stderr.length > 0) {
+    logger.error(stderr);
+  }
   logger.error(`SRT subtitle file downloaded using yt-dlp for ${videoId} not found`);
   return {
     filePath: null,
