@@ -1,3 +1,4 @@
 #Mins   Hours   Days    Months    Weekday   Command
 0       */2     *       *         *         npm run --prefix /app fetch-youtube-playlists >> /app/scripts/fetch-youtube-playlists.log 2>&1
 *       *       *       *         *         npm run --prefix /app fetch-youtube-subtitles >> /app/scripts/fetch-youtube-subtitles.log 2>&1
+0       18      *       *         *         apk -U upgrade yt-dlp >> /app/scripts/update-yt-dlp.log 2>&1
