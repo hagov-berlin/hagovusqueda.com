@@ -1,5 +1,7 @@
 FROM node:24-alpine AS base
 
+RUN apk -U add yt-dlp
+
 WORKDIR /app
 
 COPY . .
@@ -9,8 +11,6 @@ RUN npm install
 RUN npx prisma generate
 
 RUN npm run build  
-
-RUN apk -U add yt-dlp
 
 COPY crontab /var/spool/cron/crontabs/root
 

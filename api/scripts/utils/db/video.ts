@@ -2,6 +2,7 @@ import { YoutubePlaylist } from "@prisma/client";
 import slugify from "slugify";
 import prismaClient from "./prisma-client";
 import { YoutubeVideoFromPlaylist } from "../youtube-api/get-videos-from-playlist";
+import logger from "../logger";
 
 export async function videoAlreadyExists(videoId: string) {
   return !!(await prismaClient.youtubeVideo.findFirst({
@@ -27,7 +28,10 @@ export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideo
   await prismaClient.youtubeVideo.upsert({
     where: { youtubeId: video.videoId },
     update: payload,
-    create: payload,
+    create: {
+      ...payload,
+      has_yt_subs: true,
+    },
   });
 }
 
@@ -39,21 +43,25 @@ export async function deleteVideo(videoId: string) {
 }
 
 export async function getVideoWithMissingSubtitles(limit: number) {
-  const total = await prismaClient.youtubeVideo.count({
-    where: {
-      transcripts: { none: {} },
-      durationSec: { gt: 0 },
-    },
-  });
-
+  const where = {
+    transcripts: { none: {} },
+    durationSec: { gt: 0 },
+    has_yt_subs: true,
+  };
+  const total = await prismaClient.youtubeVideo.count({ where });
+  logger.info(`Total videos without subs: ${total}`);
   return prismaClient.youtubeVideo.findMany({
-    where: {
-      transcripts: { none: {} },
-      durationSec: { gt: 0 },
-    },
+    where,
     orderBy: {
       date: "desc",
     },
     take: limit,
+  });
+}
+
+export async function markVideoAsNotHavingAutoSubs(videoId: string) {
+  await prismaClient.youtubeVideo.update({
+    where: { youtubeId: videoId },
+    data: { has_yt_subs: false },
   });
 }

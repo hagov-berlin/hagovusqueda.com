@@ -4,16 +4,21 @@ import getVideosFromPlaylist from "./utils/youtube-api/get-videos-from-playlist"
 import prismaClient from "./utils/db/prisma-client";
 
 async function main() {
-  logger.info("Starting playlist job");
+  const fetchLimit = process.env.SYNC_WHOLE_PLAYLISTS === "true" ? 5_000 : 50;
+  logger.info(`Starting playlist job. Fetch limit per playlist: ${fetchLimit}`);
   const playlists = await prismaClient.youtubePlaylist.findMany();
   logger.debug(`Found ${playlists.length} playlists`);
 
   for (const playlist of playlists) {
     const show = await prismaClient.show.findFirst({ where: { id: playlist.showId } });
-    logger.debug(`Updating from playlist ${show.name} ${playlist.youtubeId}`);
+    logger.debug(
+      `Found from playlist for ${show.name}. Playlist youtube id: ${playlist.youtubeId}`
+    );
 
-    const fetchLimit = 50;
     const videos = await getVideosFromPlaylist(playlist, fetchLimit);
+    logger.info(
+      `Fetched ${videos.length} videos for ${show.name} from youtube playlist ${playlist.youtubeId}`
+    );
 
     for (const video of videos) {
       const alreadyExists = await videoAlreadyExists(video.videoId);
@@ -34,4 +39,6 @@ async function main() {
   logger.info("Playlist job ended");
 }
 
-main().catch((e) => console.error(e));
+if (process.env.PLAYLIST_CRONJOB_ENABLED === "true") {
+  main().catch((e) => console.error(e));
+}

@@ -18,19 +18,32 @@ export async function downloadSubtitles(videoId: string) {
     return {
       filePath: srtPath,
       subtitlesSRTString: fs.readFileSync(srtPath).toString(),
+      missingYoutubeSubtitles: false,
     };
   }
 
+  const missingYoutubeSubtitles = stdout.includes(
+    "There are no subtitles for the requested languages"
+  );
+  if (missingYoutubeSubtitles) {
+    return {
+      filePath: null,
+      subtitlesSRTString: null,
+      missingYoutubeSubtitles: true,
+    };
+  }
+
+  logger.error(`SRT subtitle file downloaded using yt-dlp for ${videoId} not found`);
   if (stdout.length > 0) {
     logger.error(stdout);
   }
   if (stderr.length > 0) {
     logger.error(stderr);
   }
-  logger.error(`SRT subtitle file downloaded using yt-dlp for ${videoId} not found`);
   return {
     filePath: null,
     subtitlesSRTString: null,
+    missingYoutubeSubtitles: null,
   };
 }
 

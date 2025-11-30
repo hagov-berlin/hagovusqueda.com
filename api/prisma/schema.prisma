@@ -68,6 +68,7 @@ model YoutubeVideo {
   subtitles   Subtitle[]
   transcripts Transcript[]
   ignored     Boolean?
+  has_yt_subs Boolean?
 
   @@unique([youtubeId])
   @@index([slug])
