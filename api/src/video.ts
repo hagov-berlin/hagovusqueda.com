@@ -24,6 +24,7 @@ const omit: Prisma.YoutubeVideoOmit = {
   showId: true,
   channelId: true,
   ignored: true,
+  has_yt_subs: true,
 };
 
 export async function videos(req: FastifyRequest) {
