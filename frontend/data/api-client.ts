@@ -1,4 +1,12 @@
-import { Channel, Pagination, SearchOptions, SearchResults, Show, Video, Stats } from "./types";
+import {
+  Channel,
+  Pagination,
+  SearchOptions,
+  Show,
+  Video,
+  Stats,
+  PaginatedSearchResults,
+} from "./types";
 
 type PaginatedVideos = [Video[], Pagination];
 
@@ -20,9 +28,14 @@ async function request<T>(options: RequestOptions): Promise<T> {
   return response.json();
 }
 
-export async function getSearchResults(searchOptions: SearchOptions): Promise<SearchResults> {
+export async function getSearchResults(
+  searchOptions: SearchOptions
+): Promise<PaginatedSearchResults> {
   const params: URLSearchParams = new URLSearchParams();
   params.set("q", searchOptions.q);
+  if (searchOptions.page) {
+    params.set("page", searchOptions.page.toString());
+  }
   if (searchOptions.showSlug) {
     params.set("show", searchOptions.showSlug.toString());
   }

@@ -1,12 +1,12 @@
 "use client";
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SearchOptions, SearchResults, Show } from "./types";
+import { SearchOptions, PaginatedSearchResults, Show } from "./types";
 import { getSearchResults } from "./api-client";
 
 type SearchData = {
   searchOptions: SearchOptions;
-  searchResults: SearchResults;
+  searchResults?: PaginatedSearchResults;
   doSearch: (searchTerm: string, show: string) => void;
   availableShows: Show[];
 };
@@ -15,11 +15,6 @@ const SearchContext = createContext<SearchData>({
   searchOptions: {
     q: "",
     showSlug: "",
-  },
-  searchResults: {
-    results: [],
-    resultsCapped: false,
-    loading: false,
   },
   doSearch: () => {},
   availableShows: [],
@@ -30,6 +25,13 @@ type SearchContextProps = {
   searchParams: Record<string, string>;
   availableShows: Show[];
 };
+
+function parsePageParam(paramValue?: string) {
+  if (!paramValue) return 1;
+  const parsedPage = Math.round(parseInt(paramValue, 10));
+  const page = isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+  return page;
+}
 
 function urlWithQueryParams(q: string, show: string) {
   const params = new URLSearchParams();
@@ -46,13 +48,10 @@ export function SearchContextProvider(props: SearchContextProps) {
   const [searchOptions, setSearchOptions] = useState<SearchOptions>({
     q: searchParams.q,
     showSlug: searchParams.show || "hay-algo-ahi",
+    page: parsePageParam(searchParams.page),
   });
 
-  const [searchResults, setSearchResults] = useState<SearchResults>({
-    results: [],
-    resultsCapped: false,
-    loading: !!searchParams.q,
-  });
+  const [searchResults, setSearchResults] = useState<PaginatedSearchResults>();
 
   const router = useRouter();
 
@@ -65,13 +64,13 @@ export function SearchContextProvider(props: SearchContextProps) {
   };
 
   useEffect(() => {
-    setSearchOptions({ q: searchParams.q, showSlug: searchParams.show });
-    setSearchResults({
-      loading: !!searchParams.q,
-      results: [],
-      resultsCapped: false,
+    setSearchOptions({
+      q: searchParams.q,
+      showSlug: searchParams.show,
+      page: parsePageParam(searchParams.page),
     });
-  }, [searchParams.q, searchParams.show]);
+    setSearchResults(undefined);
+  }, [searchParams.q, searchParams.show, searchParams.page]);
 
   useEffect(() => {
     if (!searchOptions.q) return;

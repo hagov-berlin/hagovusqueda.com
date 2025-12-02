@@ -11,7 +11,7 @@ export default function FormSelect() {
     <div className={`${styles.advancedOptions}  ${styles.showSelect}`}>
       <label>Buscar en</label>
       <select
-        disabled={searchResults.loading}
+        disabled={!!searchOptions.q && !searchResults}
         defaultValue={searchOptions.showSlug}
         id="hagovusqueda-search-select"
       >

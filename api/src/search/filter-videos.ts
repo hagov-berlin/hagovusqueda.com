@@ -1,4 +1,4 @@
-import buildTextRegex from "./build-text-regex";
+import { buildTextRegex } from "./utils";
 import { VideoWithSubtitles } from "./get-videos-with-subtitles";
 
 function filterSubtitles<T extends { text: string }>(

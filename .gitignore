@@ -8,3 +8,4 @@ newrelic_agent.log
 
 TODO
 .DS_Store
+venv

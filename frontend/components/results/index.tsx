@@ -8,7 +8,14 @@ export default function Results() {
 
   if (!searchOptions.q) return null;
 
-  const title = getTitle(searchOptions, searchResults, availableShows);
+  const title = getTitle(searchOptions, availableShows, searchResults);
 
-  return <VideoList videos={searchResults.results} title={title} />;
+  return (
+    <VideoList
+      videos={searchResults?.[0] || []}
+      pagination={searchResults?.[1]}
+      title={title}
+      isSearchResultList
+    />
+  );
 }

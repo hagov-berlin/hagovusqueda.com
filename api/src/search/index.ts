@@ -1,20 +1,12 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import prisma from "../db";
-import { Show } from "@prisma/client";
 import { parseQuery } from "../utils";
-import getVideoIdsFromPostgresTextSearch from "./get-video-ids-from-postgres-text-search";
-import getVideosWithSubtitles, { VideoWithSubtitles } from "./get-videos-with-subtitles";
+import getVideosWithSubtitles from "./get-videos-with-subtitles";
+import doSearchQueries from "./do-search-queries";
 import { filterVideos } from "./filter-videos";
-
-function splitIntoChunks<T>(list: T[], chunkSize: number = 50): T[][] {
-  const output: T[][] = [];
-  for (let i = 0, len = list.length; i < len; i += chunkSize)
-    output.push(list.slice(i, i + chunkSize));
-  return output;
-}
+import { getPagination } from "./utils";
 
 export default async function search(req: FastifyRequest, reply: FastifyReply) {
-  const { q, show: showSlugs, channel: channelSlug } = parseQuery(req);
+  const { q, show: showSlugs, channel: channelSlug, page } = parseQuery(req);
 
   if (!q) {
     return reply.status(400).send({ error: "Missing query param 'q'" });
@@ -22,40 +14,32 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
 
   const startTime = new Date().getTime();
 
-  let shows: Show[] = [];
-  if (showSlugs.length > 0) {
-    shows = await prisma.show.findMany({ where: { slug: { in: showSlugs } } });
-  } else if (channelSlug) {
-    shows = await prisma.show.findMany({
-      where: { channel: { slug: channelSlug } },
-    });
-  }
-  const showIds = shows.map((show) => show.id);
+  const { results: videoIds, totalCount } = await doSearchQueries(
+    q,
+    showSlugs,
+    channelSlug,
+    page,
+    10
+  );
+  const pagination = getPagination(page, totalCount);
 
-  const videoIds = await getVideoIdsFromPostgresTextSearch(q, showIds);
-  let results: VideoWithSubtitles[] = [];
-  let subtitleResults = 0;
-  let resultsCapped = false;
-  for (const videoIdsChunk of splitIntoChunks(videoIds)) {
-    const fullVideos = await getVideosWithSubtitles(videoIdsChunk);
-    const newResults = filterVideos(fullVideos, q);
-    results = [...results, ...newResults];
-    subtitleResults = results.reduce((accum, result) => result.subtitles.length + accum, 0);
-    if (results.length > 50 || subtitleResults > 500) {
-      resultsCapped = true;
-      break;
-    }
+  if (!videoIds || videoIds.length === 0) {
+    return [[], pagination];
   }
+
+  const fullVideos = await getVideosWithSubtitles(videoIds);
+  const results = filterVideos(fullVideos, q);
 
   const ms = new Date().getTime() - startTime;
   req.log.info({
     msg: "Search",
     q,
     show: showSlugs,
-    videoResults: results.length,
-    subtitleResults,
+    videoResults: totalCount,
+    page,
+    pageResults: results.length,
     ms,
   });
 
-  return { results, resultsCapped };
+  return [results, pagination];
 }

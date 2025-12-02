@@ -64,13 +64,10 @@ export type SearchOptions = {
   q: string;
   showSlug: string;
   channelSlug?: string;
+  page?: number;
 };
 
-export type SearchResults = {
-  loading: boolean;
-  results: Video[];
-  resultsCapped: boolean;
-};
+export type PaginatedSearchResults = [Video[], Pagination];
 
 export type Stats = {
   videoCount: number;

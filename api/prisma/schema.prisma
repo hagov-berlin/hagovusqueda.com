@@ -25,6 +25,7 @@ model YoutubeChannel {
 
   @@unique([youtubeId])
   @@unique([slug])
+  @@index([id])
   @@index([slug])
 }
 
@@ -39,6 +40,7 @@ model Show {
   transcripts Transcript[]
 
   @@unique([slug])
+  @@index([id])
   @@index([slug])
   @@index([channelId])
 }
@@ -52,6 +54,7 @@ model YoutubePlaylist {
   channel   YoutubeChannel? @relation(fields: [channelId], references: [id])
 
   @@unique([youtubeId])
+  @@index([id])
 }
 
 model YoutubeVideo {
@@ -71,6 +74,7 @@ model YoutubeVideo {
   has_yt_subs Boolean?
 
   @@unique([youtubeId])
+  @@index([id])
   @@index([slug])
   @@index([showId])
   @@index([channelId])
@@ -83,14 +87,19 @@ model Transcript {
 
   videoId Int
   video   YoutubeVideo @relation(fields: [videoId], references: [id])
-  showId  Int
-  show    Show         @relation(fields: [showId], references: [id])
+
+  showId Int // TODO: remove. It is redundant. Anyway we'll join this table with the video table
+  show   Show @relation(fields: [showId], references: [id])
 
   type String
   text String
   srt  String
 
+  search_vector Unsupported("tsvector")?
+
   @@unique([videoId, type], name: "video_id_type")
+  @@index([search_vector], type: Gin)
+  @@index([id])
   @@index([videoId])
   @@index([type])
   @@index([videoId, type])
@@ -106,6 +115,7 @@ model Subtitle {
   videoId     Int
   type        String
 
+  @@index([id])
   @@index([videoId])
   @@index([order])
 }

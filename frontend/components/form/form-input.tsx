@@ -11,7 +11,7 @@ export function FormInput() {
         id="hagovusqueda-search-input"
         type="text"
         className={styles.input}
-        disabled={searchResults.loading}
+        disabled={!!searchOptions.q && !searchResults}
         defaultValue={searchOptions.q}
         autoFocus={!searchOptions.q}
         placeholder='Por ej: "Morfleps"'
