@@ -8,7 +8,7 @@ import { videos, video } from "./video";
 import search from "./search";
 import stats from "./stats";
 
-const fastify = Fastify({ logger: true, ignoreTrailingSlash: true });
+const fastify = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
 
 fastify.get("/", () => ({ msg: "api.hagovusqueda.com", link: "https://hagovusqueda.com" }));
 

@@ -4,7 +4,7 @@ import { normalizeText } from "./search/utils";
 export function parseQuery(req: FastifyRequest) {
   const query = req.query as Record<string, string | undefined>;
 
-  const { q, show: showString, channel, page: pageString } = query;
+  const { q: rawQ, show: showString, channel, page: pageString } = query;
 
   const page = pageString ? parseInt(pageString) : 1;
 
@@ -17,5 +17,10 @@ export function parseQuery(req: FastifyRequest) {
       .filter((s) => s.length < 500);
   }
 
-  return { q: normalizeText(q), page, show, channel };
+  let q = "";
+  if (rawQ) {
+    q = normalizeText(q);
+  }
+
+  return { q, page, show, channel };
 }
