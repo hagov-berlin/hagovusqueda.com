@@ -9,7 +9,7 @@ import { saveTranscript } from "./utils/db/transcript";
 import { YoutubeVideo } from "@prisma/client";
 
 async function sleepSeconds(seconds: number) {
-  logger.info(`Sleeping ${seconds} seconds`);
+  logger.debug(`Sleeping ${seconds} seconds`);
   return new Promise<void>((resolve) => {
     setTimeout(() => resolve(), seconds * 1000);
   });
@@ -22,15 +22,22 @@ async function processSubtitleSRT(video: YoutubeVideo, subtitlesSRTString: strin
   await createMany(video, subtitlesArray, "youtube-auto-generated");
 }
 
+const oneDayInMs = 24 * 60 * 60 * 1000;
+const oneWeekAgo = new Date().getTime() - 14 * oneDayInMs;
+
 async function main() {
-  logger.info("Starting subtitles job");
-  const videos = await getVideoWithMissingSubtitles(5);
+  logger.debug("Starting subtitles job");
+  const fetchLimit = parseInt(process.env.SUBTITLES_CRONJOB_FETCH_LIMIT || "50");
+  const videos = await getVideoWithMissingSubtitles(fetchLimit);
+
+  let processedCount = 0;
+  let unprocessedCount = 0;
   for (const video of videos) {
-    await sleepSeconds(5);
     logger.info(`Getting subtitles for ${video.youtubeId}`);
     const subtitlesSRTString = await getSubtitlesFromS3Bucket(video.youtubeId);
     if (subtitlesSRTString) {
-      logger.info(`Got subtitles from aws for ${video.youtubeId}`);
+      logger.debug(`Got subtitles from aws for ${video.youtubeId}`);
+      processedCount += 1;
       await processSubtitleSRT(video, subtitlesSRTString);
     } else {
       logger.debug(
@@ -39,21 +46,31 @@ async function main() {
       const { filePath, subtitlesSRTString, missingYoutubeSubtitles } = await downloadSubtitles(
         video.youtubeId
       );
-      if (!subtitlesSRTString) {
+
+      if (subtitlesSRTString) {
+        processedCount += 1;
+        await processSubtitleSRT(video, subtitlesSRTString);
+        await uploadSubtitlesToS3Bucket(video.youtubeId, subtitlesSRTString);
+        fs.unlinkSync(filePath);
+        await sleepSeconds(5);
+      } else {
+        unprocessedCount += 1;
         if (missingYoutubeSubtitles) {
-          logger.info(`Youtube doesn't have auto-generated subtitles for ${video.youtubeId}`);
-          await markVideoAsNotHavingAutoSubs(video.youtubeId);
+          logger.debug(`Youtube doesn't have auto-generated subtitles for ${video.youtubeId}`);
+          if (video.date.getTime() < oneWeekAgo) {
+            logger.info(
+              `Marking ${video.youtubeId} as not having youtube subtitles since it's already been a week.`
+            );
+            await markVideoAsNotHavingAutoSubs(video.youtubeId);
+          }
         } else {
           logger.error(`Skipping ${video.youtubeId}. No subtitles`);
         }
         continue;
       }
-      await processSubtitleSRT(video, subtitlesSRTString);
-      await uploadSubtitlesToS3Bucket(video.youtubeId, subtitlesSRTString);
-      fs.unlinkSync(filePath);
     }
   }
-  logger.info("Subtitles job ended");
+  logger.info(`Subtitles job ended`, { processedCount, unprocessedCount });
 }
 
 if (process.env.SUBTITLES_CRONJOB_ENABLED === "true") {

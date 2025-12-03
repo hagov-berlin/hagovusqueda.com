@@ -11,7 +11,21 @@ export async function downloadSubtitles(videoId: string) {
   const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
   const command = `yt-dlp "${videoUrl}" --skip-download --write-auto-sub --sub-lang "es" --sub-format srt --output "${outputPath}"`;
   logger.debug(`Downloading subtitles for ${videoId} using yt-dlp`);
-  const { stdout, stderr } = await execPromise(command);
+
+  let stdout = "";
+  let stderr = "";
+  try {
+    const commandReponse = await execPromise(command);
+    stderr = commandReponse.stderr;
+    stdout = commandReponse.stdout;
+  } catch (error) {
+    logger.error(`Catched error`, error);
+    stderr = error.stderr;
+    stdout = error.stdout;
+  }
+
+  logger.debug(stdout);
+  logger.debug(stderr);
 
   const srtPath = `${outputPath}.es.srt`;
   if (fs.existsSync(srtPath)) {
@@ -22,9 +36,9 @@ export async function downloadSubtitles(videoId: string) {
     };
   }
 
-  const missingYoutubeSubtitles = stdout.includes(
-    "There are no subtitles for the requested languages"
-  );
+  const missingYoutubeSubtitles =
+    stdout.includes("There are no subtitles for the requested languages") ||
+    stderr.includes("Video unavailable");
   if (missingYoutubeSubtitles) {
     return {
       filePath: null,

@@ -12,7 +12,7 @@ export default async function fetchVideoDetails(ids: string[]) {
   const youtubeApiKey = process.env.YOUTUBE_API_KEY;
   const detailUrl = `https://www.googleapis.com/youtube/v3/videos?key=${youtubeApiKey}&id=${ids.join(
     ","
-  )}&part=contentDetails,liveStreamingDetails`;
+  )}&part=contentDetails,liveStreamingDetails`; // TODO: check if part=status contains interesting info
   logger.debug(`Requesting ${detailUrl}`);
   const detailResponse = await fetch(detailUrl);
   const detailJson: { items: VideoDetail[] } = await detailResponse.json();

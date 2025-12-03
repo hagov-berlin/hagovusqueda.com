@@ -11,6 +11,7 @@ export async function videoAlreadyExists(videoId: string) {
 }
 
 export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideoFromPlaylist) {
+  // TODO: if the duration changed then we need to delete stored (db and s3) subtitles for the video
   const payload = {
     youtubeId: video.videoId,
     title: video.title,
@@ -49,13 +50,14 @@ export async function getVideoWithMissingSubtitles(limit: number) {
     has_yt_subs: true,
   };
   const total = await prismaClient.youtubeVideo.count({ where });
-  logger.info(`Total videos without subs: ${total}`);
+  logger.debug(`Total videos without subs: ${total}`);
   return prismaClient.youtubeVideo.findMany({
     where,
     orderBy: {
       date: "desc",
     },
     take: limit,
+    skip: total > 1 ? Math.floor(Math.random() * (total - limit)) : 0,
   });
 }
 
