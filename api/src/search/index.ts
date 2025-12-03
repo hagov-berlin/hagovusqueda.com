@@ -23,12 +23,14 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
   );
   const pagination = getPagination(page, totalCount);
 
-  if (!videoIds || videoIds.length === 0) {
-    return [[], pagination];
-  }
+  type Result = ReturnType<typeof filterVideos>[number];
 
-  const fullVideos = await getVideosWithSubtitles(videoIds);
-  const results = filterVideos(fullVideos, q);
+  let results: Result[] = [];
+
+  if (videoIds && videoIds.length > 0) {
+    const fullVideos = await getVideosWithSubtitles(videoIds);
+    results = filterVideos(fullVideos, q);
+  }
 
   const ms = new Date().getTime() - startTime;
   req.log.info({

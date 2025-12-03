@@ -1,4 +1,5 @@
 import { FastifyRequest } from "fastify";
+import { normalizeText } from "./search/utils";
 
 export function parseQuery(req: FastifyRequest) {
   const query = req.query as Record<string, string | undefined>;
@@ -16,5 +17,5 @@ export function parseQuery(req: FastifyRequest) {
       .filter((s) => s.length < 500);
   }
 
-  return { q, page, show, channel };
+  return { q: normalizeText(q), page, show, channel };
 }

@@ -6,13 +6,7 @@ type QueryResult = {
   results: number[];
 };
 
-function buildQuery(
-  q: string,
-  showIds: number[],
-  page: number,
-  perPage: number,
-  queryType: "results" | "count"
-) {
+function buildQuery(q: string, showIds: number[], page: number, perPage: number) {
   const params: [string, number[]?] = [`"${q}"`];
 
   let showsFilter = "";
@@ -55,7 +49,7 @@ export default async function doSearchQueries(
 ) {
   const showIds = await getShowIds(showSlugs, channelSlug);
 
-  const { sqlQuery, params } = buildQuery(q, showIds, page, perPage, "results");
+  const { sqlQuery, params } = buildQuery(q, showIds, page, perPage);
   const queryResults: QueryResult[] = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
   const [{ results, total }] = queryResults;
 

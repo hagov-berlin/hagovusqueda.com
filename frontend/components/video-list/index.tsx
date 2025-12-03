@@ -22,7 +22,7 @@ export default function VideoList(props: VideoListProps) {
         {videos?.map((result) => (
           <VideoResult key={result.youtubeId} result={result} videoLink={videoLinks} />
         ))}
-        {pagination ? (
+        {pagination && pagination.pageCount > 1 ? (
           <PaginationLinks pagination={pagination} isSearchResultList={isSearchResultList} />
         ) : null}
       </div>
