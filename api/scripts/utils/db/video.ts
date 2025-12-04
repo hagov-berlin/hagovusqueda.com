@@ -57,7 +57,7 @@ export async function getVideoWithMissingSubtitles(limit: number) {
       date: "desc",
     },
     take: limit,
-    skip: total > 1 ? Math.floor(Math.random() * (total - limit)) : 0,
+    skip: total > 1 && total > limit ? Math.floor(Math.random() * (total - limit)) : 0,
   });
 }
 

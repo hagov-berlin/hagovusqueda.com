@@ -19,7 +19,7 @@ export function parseQuery(req: FastifyRequest) {
 
   let q = "";
   if (rawQ) {
-    q = normalizeText(q);
+    q = normalizeText(rawQ);
   }
 
   return { q, page, show, channel };
