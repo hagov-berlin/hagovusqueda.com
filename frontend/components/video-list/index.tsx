@@ -10,11 +10,10 @@ type VideoListProps = {
   title?: ReactNode;
   pagination?: Pagination;
   videoLinks?: boolean;
-  isSearchResultList?: boolean;
 };
 
 export default function VideoList(props: VideoListProps) {
-  const { videos, title, pagination, videoLinks, isSearchResultList } = props;
+  const { videos, title, pagination, videoLinks } = props;
   return (
     <Container>
       <div className={styles.results}>
@@ -23,7 +22,7 @@ export default function VideoList(props: VideoListProps) {
           <VideoResult key={result.youtubeId} result={result} videoLink={videoLinks} />
         ))}
         {pagination && pagination.pageCount > 1 ? (
-          <PaginationLinks pagination={pagination} isSearchResultList={isSearchResultList} />
+          <PaginationLinks pagination={pagination} />
         ) : null}
       </div>
     </Container>

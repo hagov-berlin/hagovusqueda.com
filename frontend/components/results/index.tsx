@@ -11,11 +11,6 @@ export default function Results() {
   const title = getTitle(searchOptions, availableShows, searchResults);
 
   return (
-    <VideoList
-      videos={searchResults?.[0] || []}
-      pagination={searchResults?.[1]}
-      title={title}
-      isSearchResultList
-    />
+    <VideoList videos={searchResults?.[0] || []} pagination={searchResults?.[1]} title={title} />
   );
 }
