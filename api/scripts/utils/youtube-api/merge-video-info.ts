@@ -16,7 +16,7 @@ export default function mergeVideoInfo(
     }
     const durationString = detail?.contentDetails.duration;
     return {
-      videoId: item.snippet.resourceId.videoId,
+      youtubeId: item.snippet.resourceId.videoId,
       title: item.snippet.title,
       date: detail?.liveStreamingDetails?.actualStartTime || item.snippet.publishedAt,
       duration: isValidDuration(durationString) ? getDurationInSeconds(durationString) : 0,

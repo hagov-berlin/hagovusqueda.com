@@ -4,16 +4,28 @@ import prismaClient from "./prisma-client";
 import { YoutubeVideoFromPlaylist } from "../youtube-api/get-videos-from-playlist";
 import logger from "../logger";
 
-export async function videoAlreadyExists(videoId: string) {
+export async function videoAlreadyExists(youtubeId: string) {
   return !!(await prismaClient.youtubeVideo.findFirst({
-    where: { youtubeId: videoId },
+    where: { youtubeId: youtubeId },
   }));
 }
 
 export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideoFromPlaylist) {
-  // TODO: if the duration changed then we need to delete stored (db and s3) subtitles for the video
+  const existingVideo = await prismaClient.youtubeVideo.findFirst({
+    where: {
+      youtubeId: video.youtubeId,
+    },
+  });
+
+  if (existingVideo && existingVideo.durationSec !== video.duration) {
+    logger.info(
+      `Deleting existing video ${video.youtubeId} before upsert because the duration changed`
+    );
+    await deleteVideo(video.youtubeId);
+  }
+
   const payload = {
-    youtubeId: video.videoId,
+    youtubeId: video.youtubeId,
     title: video.title,
     slug: slugify(video.title.replace(/[\|\$]/g, ""), {
       lower: true,
@@ -22,24 +34,30 @@ export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideo
     }),
     date: new Date(video.date),
     durationSec: video.duration,
-    channelId: playlist.channelId ? playlist.channelId : undefined,
-    showId: playlist.showId ? playlist.showId : undefined,
-    ignored: playlist.showId ? false : undefined,
   };
   await prismaClient.youtubeVideo.upsert({
-    where: { youtubeId: video.videoId },
+    where: { youtubeId: video.youtubeId },
     update: payload,
     create: {
       ...payload,
+      channelId: playlist.channelId ? playlist.channelId : undefined,
+      showId: playlist.showId ? playlist.showId : undefined,
+      ignored: playlist.showId ? false : undefined,
       has_yt_subs: true,
     },
   });
 }
 
-export async function deleteVideo(videoId: string) {
-  // TODO: also remove transcript and subtitles if they already exist
-  await prismaClient.youtubeVideo.delete({
-    where: { youtubeId: videoId },
+export async function deleteVideo(youtubeId: string) {
+  // TODO: delete subs file from s3?
+  await prismaClient.transcript.deleteMany({
+    where: { video: { youtubeId } },
+  });
+  await prismaClient.subtitle.deleteMany({
+    where: { video: { youtubeId } },
+  });
+  await prismaClient.youtubeVideo.deleteMany({
+    where: { youtubeId },
   });
 }
 
@@ -61,9 +79,9 @@ export async function getVideoWithMissingSubtitles(limit: number) {
   });
 }
 
-export async function markVideoAsNotHavingAutoSubs(videoId: string) {
+export async function markVideoAsNotHavingAutoSubs(youtubeId: string) {
   await prismaClient.youtubeVideo.update({
-    where: { youtubeId: videoId },
+    where: { youtubeId },
     data: { has_yt_subs: false },
   });
 }

@@ -23,15 +23,15 @@ async function main() {
     );
 
     for (const video of videos) {
-      const alreadyExists = await videoAlreadyExists(video.videoId);
+      const alreadyExists = await videoAlreadyExists(video.youtubeId);
       if (alreadyExists && video.private) {
-        logger.info(`Removing video ${video.videoId}`);
-        await deleteVideo(video.videoId);
+        logger.info(`Removing video ${video.youtubeId}`);
+        await deleteVideo(video.youtubeId);
       } else if (!video.private) {
         if (alreadyExists) {
-          logger.debug(`Updating video ${video.videoId}`);
+          logger.debug(`Updating video ${video.youtubeId}`);
         } else {
-          logger.info(`New video ${video.videoId}`);
+          logger.info(`New video ${video.youtubeId}`);
         }
         await upsertVideo(playlist, video);
       }

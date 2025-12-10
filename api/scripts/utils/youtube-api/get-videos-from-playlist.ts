@@ -5,7 +5,7 @@ import fetchVideoDetails from "./fetch-video-details";
 import mergeVideoInfo from "./merge-video-info";
 
 export type YoutubeVideoFromPlaylist = {
-  videoId: string;
+  youtubeId: string;
   title: string;
   date: string;
   duration: number;
