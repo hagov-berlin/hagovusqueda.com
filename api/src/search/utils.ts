@@ -1,5 +1,6 @@
 import { Show } from "@prisma/client";
 import prisma from "../db";
+import { PageNumberCounters, PageNumberPagination } from "prisma-extension-pagination/dist/types";
 
 export async function getShowIds(showSlugs: string[], channelSlug: string) {
   let shows: Show[] = [];
@@ -31,7 +32,10 @@ export function buildTextRegex(q: string) {
   };
 }
 
-export function getPagination(page: number, totalCount: number) {
+export function getPagination(
+  page: number,
+  totalCount: number
+): PageNumberPagination & PageNumberCounters {
   const amountPerPage = 10;
   const isFirstPage = page === 1;
   const pageCount = totalCount === 0 ? 1 : Math.ceil(totalCount / amountPerPage);

@@ -23,6 +23,7 @@ function buildQuery(q: string, showIds: number[], page: number, perPage: number)
       FROM "Transcript" t
       INNER JOIN "YoutubeVideo" v ON t."videoId" = v."id"
       WHERE t.search_vector @@ phraseto_tsquery('simple', $1)
+        AND v."ignored" = FALSE
       ${showsFilter}
     ),
     paginated AS (

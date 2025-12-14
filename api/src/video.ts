@@ -61,7 +61,7 @@ export async function videos(req: FastifyRequest) {
 export async function video(req: FastifyRequest) {
   const { id } = req.params as Record<string, string>;
   return await prisma.youtubeVideo.findFirst({
-    where: { youtubeId: id },
+    where: { youtubeId: id, ignored: false },
     include: {
       ...include,
       subtitles: {
