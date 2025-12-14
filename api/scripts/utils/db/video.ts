@@ -18,10 +18,15 @@ export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideo
   });
 
   if (existingVideo && existingVideo.durationSec !== video.duration) {
+    // TODO: technically should be enough to just delete the transcript/subtitles, right?
     logger.info(
       `Deleting existing video ${video.youtubeId} before upsert because the duration changed`
     );
     await deleteVideo(video.youtubeId);
+  } else if (existingVideo) {
+    logger.debug(`Updating video ${video.youtubeId}`);
+  } else {
+    logger.info(`New video ${video.youtubeId}`);
   }
 
   const payload = {
@@ -49,7 +54,6 @@ export async function upsertVideo(playlist: YoutubePlaylist, video: YoutubeVideo
 }
 
 export async function deleteVideo(youtubeId: string) {
-  // TODO: delete subs file from s3?
   await prismaClient.transcript.deleteMany({
     where: { video: { youtubeId } },
   });
@@ -65,7 +69,10 @@ export async function getVideoWithMissingSubtitles(limit: number) {
   const where = {
     transcripts: { none: {} },
     durationSec: { gt: 0 },
-    has_yt_subs: true,
+    has_yt_subs: true, // TODO: revisit this when external sources of subtitles become available
+    NOT: {
+      ignored: true,
+    },
   };
   const total = await prismaClient.youtubeVideo.count({ where });
   logger.debug(`Total videos without subs: ${total}`);

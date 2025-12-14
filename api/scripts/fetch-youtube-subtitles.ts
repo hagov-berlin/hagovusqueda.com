@@ -7,13 +7,7 @@ import srtToArray from "./utils/srt-to-array";
 import { createMany } from "./utils/db/subtitles";
 import { saveTranscript } from "./utils/db/transcript";
 import { YoutubeVideo } from "@prisma/client";
-
-async function sleepSeconds(seconds: number) {
-  logger.debug(`Sleeping ${seconds} seconds`);
-  return new Promise<void>((resolve) => {
-    setTimeout(() => resolve(), seconds * 1000);
-  });
-}
+import sleepSeconds from "./utils/sleep-seconds";
 
 async function processSubtitleSRT(video: YoutubeVideo, subtitlesSRTString: string) {
   logger.info(`Saving transcript and subtitles for video ${video.youtubeId}`);
@@ -34,7 +28,7 @@ async function main() {
   let unprocessedCount = 0;
   for (const video of videos) {
     logger.info(`Getting subtitles for ${video.youtubeId}`);
-    const subtitlesSRTString = await getSubtitlesFromS3Bucket(video.youtubeId);
+    const subtitlesSRTString = await getSubtitlesFromS3Bucket(video.youtubeId, video.durationSec);
     if (subtitlesSRTString) {
       logger.debug(`Got subtitles from aws for ${video.youtubeId}`);
       processedCount += 1;
@@ -50,7 +44,7 @@ async function main() {
       if (subtitlesSRTString) {
         processedCount += 1;
         await processSubtitleSRT(video, subtitlesSRTString);
-        await uploadSubtitlesToS3Bucket(video.youtubeId, subtitlesSRTString);
+        await uploadSubtitlesToS3Bucket(video.youtubeId, video.durationSec, subtitlesSRTString);
         fs.unlinkSync(filePath);
         await sleepSeconds(5);
       } else {

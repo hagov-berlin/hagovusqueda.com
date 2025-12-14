@@ -9,14 +9,14 @@ import logger from "./logger";
 
 const bucketName = process.env.S3_BUCKET_NAME;
 
-export async function getSubtitlesFromS3Bucket(videoId: string) {
+export async function getSubtitlesFromS3Bucket(videoId: string, durationSec: number) {
   const client = new S3Client({ region: "eu-central-1" });
 
   try {
     const response = await client.send(
       new GetObjectCommand({
         Bucket: bucketName,
-        Key: `subtitles/youtube/${videoId}-youtube.srt`,
+        Key: `subtitles/youtube/${videoId}-${durationSec}-youtube.srt`,
       })
     );
     const subtitleStr = await response.Body.transformToString();
@@ -36,9 +36,13 @@ export async function getSubtitlesFromS3Bucket(videoId: string) {
   return null;
 }
 
-export async function uploadSubtitlesToS3Bucket(videoId: string, subtitlesSRTString: string) {
+export async function uploadSubtitlesToS3Bucket(
+  videoId: string,
+  durationSec: number,
+  subtitlesSRTString: string
+) {
   const client = new S3Client({ region: "eu-central-1" });
-  const key = `subtitles/youtube/${videoId}-youtube.srt`;
+  const key = `subtitles/youtube/${videoId}-${durationSec}-youtube.srt`;
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
