@@ -29,7 +29,7 @@ export default async function search(req: FastifyRequest, reply: FastifyReply) {
 
   if (videoIds && videoIds.length > 0) {
     const fullVideos = await getVideosWithSubtitles(videoIds);
-    results = filterVideos(fullVideos, q);
+    results = filterVideos(fullVideos, q, req.log);
   }
 
   const ms = new Date().getTime() - startTime;
