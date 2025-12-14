@@ -1,7 +1,10 @@
 import "newrelic";
 import Fastify from "fastify";
-import prisma from "./db";
+import fs from "fs";
+import path from "path";
 import cors from "@fastify/cors";
+
+import prisma from "./db";
 import { channels, channel } from "./channel";
 import { shows, show } from "./show";
 import { videos, video } from "./video";
@@ -19,7 +22,11 @@ fastify.get("/db-check", async () => {
   return result;
 });
 
-fastify.get("/favicon.ico", (req, res) => res.status(204)); // TODO
+const ico = fs.readFileSync(path.join(__dirname, "../favicon.ico"));
+fastify.get("/favicon.ico", (req, res) => {
+  res.header("Content-Type", "image/x-icon");
+  res.send(ico);
+});
 
 fastify.get("/channels", channels);
 fastify.get("/channels/:slug", channel);
