@@ -22,7 +22,7 @@ fastify.get("/db-check", async () => {
   return result;
 });
 
-const ico = fs.readFileSync(path.join(__dirname, "../favicon.ico"));
+const ico = fs.readFileSync("/app/favicon.ico");
 fastify.get("/favicon.ico", (req, res) => {
   res.header("Content-Type", "image/x-icon");
   res.send(ico);
