@@ -12,6 +12,8 @@ async function main() {
     ["Caricias Significativas", "caricias-significativas", "UC3fP6tXe2Y789Ubm0VTFnvA"],
     ["M.A.G.A.", "maga", ""],
     ["Paren La Mano", "paren-la-mano", "UCulzKEqyE73gXCUqTimbP4A"],
+    ["Nico Guthmann", "nico-guthmann", "UCpvYnSZNyBxF2MSWvju06jg"],
+    ["Vorterix", "vorterix", "UCvCTWHCbBC0b9UIeLeNs8ug"],
   ] as const;
   for (const [name, slug, youtubeId] of channels) {
     const payload = { name, slug, youtubeId };
@@ -50,6 +52,8 @@ async function main() {
     ["M.A.G.A.", "maga", "maga"],
     ["Paren La Mano", "paren-la-mano", "paren-la-mano"],
     ["Industria Nacional", "industria-nacional", "gelatina"],
+    ["TUGO", "tugo", "nico-guthmann"],
+    ["Desde el Respeto", "desde-el-respeto", "vorterix"],
   ] as const;
   for (const [name, slug, channelSlug] of shows) {
     const channel = await prisma.youtubeChannel.findFirst({ where: { slug: channelSlug } });
@@ -95,6 +99,8 @@ async function main() {
     ["PLSaospqN2Pt95vDDK3S2DflxXbkcC4EcI", "maga"],
     ["PLZFDO5xhcskcu64RZf8fOX_7lb2fsgDt7", "maga"],
     ["PLoxR_077g8dKBKwRmmJLI53uo68MkB4WL", "paren-la-mano"],
+    ["PL_0h1CfACxbUYq-VBx4-hLdd3MaJFclGt", "tugo"],
+    ["PLHZOhV2rP0rkfCYg81UotG0J2-aD5x0M8", "desde-el-respeto"],
   ] as const;
   for (const [youtubeId, showSlug] of playlists) {
     const show = await prisma.show.findFirst({ where: { slug: showSlug } });
