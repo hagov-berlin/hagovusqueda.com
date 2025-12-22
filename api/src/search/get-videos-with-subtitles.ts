@@ -1,7 +1,5 @@
 import prisma from "../db";
 
-export type VideoWithSubtitles = Awaited<ReturnType<typeof getVideosWithSubtitles>>[number];
-
 export default function getVideosWithSubtitles(videoIds: number[]) {
   return prisma.youtubeVideo.findMany({
     where: {

@@ -2,13 +2,7 @@ import { YoutubeVideo } from "@prisma/client";
 import srtToArray from "../srt-to-array";
 import prismaClient from "./prisma-client";
 import logger from "../logger";
-
-function normalizeText(text: string) {
-  // TODO: merge this function with the one in the search endpoint
-  text = text.replace(/[\[\],\.¿\?¡!\-"'%`:$€+\/@²º*]/g, "");
-  text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  return text.replace(/\s+/g, " ").toLocaleLowerCase().trim();
-}
+import { normalizeText } from "../../../src/search/utils";
 
 export async function saveTranscript(video: YoutubeVideo, srtString: string) {
   if (!video.showId) throw new Error(`Missing showId while saving transcript`);

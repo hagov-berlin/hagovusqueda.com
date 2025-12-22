@@ -17,19 +17,15 @@ export async function getShowIds(showSlugs: string[], channelSlug: string) {
 
 export function normalizeText(text: string) {
   // TODO: merge this function with the one in the search endpoint
-  text = text.replace(/[\\\[\],\.¿\?¡!\-"'%`:$€+\/@²º*]/g, "");
+  text = text.replace(/[\\\[\],\.¿\?¡!\-"'%`:$€+\/@²º*\_]/g, "");
   text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  return text.replace(/\s+/g, " ").toLocaleLowerCase();
+  return text.replace(/\s+/g, " ").toLocaleLowerCase().trim();
 }
 
 export function buildTextRegex(q: string) {
   const normalizedSearchTerm = normalizeText(q);
   const regexString = `\\b${normalizedSearchTerm}\\b`;
-  const searchRegex = new RegExp(regexString, "i");
-  return function testRegex(textToTest: string) {
-    const normalizedTextToTest = normalizeText(textToTest);
-    return searchRegex.test(normalizedTextToTest);
-  };
+  return new RegExp(regexString, "ig");
 }
 
 export function getPagination(
