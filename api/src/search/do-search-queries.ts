@@ -11,7 +11,7 @@ function buildQuery(q: string, showIds: number[], page: number, perPage: number)
 
   let showsFilter = "";
   if (showIds.length > 0) {
-    showsFilter = ` AND t."showId" = ANY($2::int[])`;
+    showsFilter = ` AND v."showId" = ANY($2::int[])`;
     params.push(showIds);
   }
 

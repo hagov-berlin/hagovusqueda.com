@@ -3,18 +3,8 @@ import { getVideoWithMissingSubtitles, markVideoAsNotHavingAutoSubs } from "./ut
 import logger from "./utils/logger";
 import { downloadSubtitles } from "./utils/yt-dlp-client";
 import fs from "fs";
-import srtToArray from "./utils/srt-to-array";
-import { createMany } from "./utils/db/subtitles";
-import { saveTranscript } from "./utils/db/transcript";
-import { YoutubeVideo } from "@prisma/client";
 import sleepSeconds from "./utils/sleep-seconds";
-
-async function processSubtitleSRT(video: YoutubeVideo, subtitlesSRTString: string) {
-  logger.info(`Saving transcript and subtitles for video ${video.youtubeId}`);
-  const subtitlesArray = srtToArray(subtitlesSRTString);
-  await saveTranscript(video, subtitlesArray, subtitlesSRTString, "youtube-auto-generated");
-  await createMany(video, subtitlesArray, "youtube-auto-generated");
-}
+import { saveTranscript } from "./utils/db/transcript";
 
 const oneDayInMs = 24 * 60 * 60 * 1000;
 const oneWeekAgo = new Date().getTime() - 14 * oneDayInMs;
@@ -32,7 +22,7 @@ async function main() {
     if (subtitlesSRTString) {
       logger.debug(`Got subtitles from aws for ${video.youtubeId}`);
       processedCount += 1;
-      await processSubtitleSRT(video, subtitlesSRTString);
+      await saveTranscript(video, subtitlesSRTString);
     } else {
       logger.debug(
         `No subtitles in S3 bucket. Getting subtitles for ${video.youtubeId} using yt-dlp`
@@ -43,7 +33,7 @@ async function main() {
 
       if (subtitlesSRTString) {
         processedCount += 1;
-        await processSubtitleSRT(video, subtitlesSRTString);
+        await saveTranscript(video, subtitlesSRTString);
         await uploadSubtitlesToS3Bucket(video.youtubeId, video.durationSec, subtitlesSRTString);
         fs.unlinkSync(filePath);
         await sleepSeconds(5);

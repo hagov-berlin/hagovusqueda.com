@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import prisma from "./db";
 import { FastifyRequest } from "fastify";
 import { parseQuery } from "./utils";
+import srtToArray from "../scripts/utils/srt-to-array";
 
 const include: Prisma.YoutubeVideoInclude = {
   show: {
@@ -60,15 +61,21 @@ export async function videos(req: FastifyRequest) {
 
 export async function video(req: FastifyRequest) {
   const { id } = req.params as Record<string, string>;
-  return await prisma.youtubeVideo.findFirst({
+  const video = await prisma.youtubeVideo.findFirst({
     where: { youtubeId: id, ignored: false },
-    include: {
-      ...include,
-      subtitles: {
-        orderBy: { order: "asc" },
-        omit: { id: true },
-      },
-    },
+    include,
     omit,
   });
+
+  const transcript = await prisma.transcript.findFirst({
+    where: {
+      video: { youtubeId: id },
+    },
+    select: {
+      subtitles: true,
+    },
+  });
+  const subtitles = transcript?.subtitles || [];
+
+  return { ...video, subtitles };
 }

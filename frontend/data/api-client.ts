@@ -25,6 +25,9 @@ async function request<T>(options: RequestOptions): Promise<T> {
     ? `${baseUrl}${options.path}?${options.params.toString()}`
     : `${baseUrl}${options.path}`;
   const response = await fetch(url, { cache: "no-store" });
+  if (response.status != 200) {
+    throw new Error(await response.text());
+  }
   return response.json();
 }
 

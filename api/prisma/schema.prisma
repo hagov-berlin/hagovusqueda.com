@@ -30,14 +30,13 @@ model YoutubeChannel {
 }
 
 model Show {
-  id          Int               @id @default(autoincrement())
-  name        String
-  slug        String
-  channelId   Int
-  channel     YoutubeChannel    @relation(fields: [channelId], references: [id])
-  playlists   YoutubePlaylist[]
-  videos      YoutubeVideo[]
-  transcripts Transcript[]
+  id        Int               @id @default(autoincrement())
+  name      String
+  slug      String
+  channelId Int
+  channel   YoutubeChannel    @relation(fields: [channelId], references: [id])
+  playlists YoutubePlaylist[]
+  videos    YoutubeVideo[]
 
   @@unique([slug])
   @@index([id])
@@ -68,10 +67,13 @@ model YoutubeVideo {
   channel     YoutubeChannel? @relation(fields: [channelId], references: [id])
   durationSec Int
   date        DateTime
-  subtitles   Subtitle[]
   transcripts Transcript[]
   ignored     Boolean?
   has_yt_subs Boolean?
+
+  subVideos     YoutubeVideo[] @relation(name: "subVideos")
+  parentVideo   YoutubeVideo?  @relation(fields: [parentVideoId], references: [id], name: "subVideos")
+  parentVideoId Int?
 
   @@unique([youtubeId])
   @@index([id])
@@ -88,12 +90,11 @@ model Transcript {
   videoId Int
   video   YoutubeVideo @relation(fields: [videoId], references: [id])
 
-  showId Int // TODO: remove. It is redundant. Anyway we'll join this table with the video table
-  show   Show @relation(fields: [showId], references: [id])
-
   type String
   text String
   srt  String
+
+  subtitles Json @default("[]")
 
   search_vector Unsupported("tsvector")?
 
@@ -103,19 +104,4 @@ model Transcript {
   @@index([videoId])
   @@index([type])
   @@index([videoId, type])
-}
-
-model Subtitle {
-  id          Int          @id @default(autoincrement())
-  order       Int
-  startTimeMs Int
-  endTimeMs   Int
-  text        String
-  video       YoutubeVideo @relation(fields: [videoId], references: [id])
-  videoId     Int
-  type        String
-
-  @@index([id])
-  @@index([videoId])
-  @@index([order])
 }

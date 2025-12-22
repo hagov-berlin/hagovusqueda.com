@@ -1,17 +1,18 @@
 import { buildTextRegex } from "./utils";
 import { VideoWithSubtitles } from "./get-videos-with-subtitles";
 import { FastifyBaseLogger } from "fastify";
+import { Subtitle } from "../../scripts/utils/srt-to-array";
 
-function filterSubtitles<T extends { text: string }>(
-  subtitles: T[],
+function filterSubtitles(
+  subtitles: Subtitle[],
   textMatcher: (text: string) => boolean
-): T[] {
+): Subtitle[] {
   const matches = subtitles.filter((subtitle, index) => {
-    const subtitleText = subtitle.text;
+    const subtitleText = subtitle[0];
     const subtitleMatches = textMatcher(subtitleText);
     if (subtitleMatches) return true;
 
-    const nextSubtitleText = subtitles[index + 1]?.text;
+    const nextSubtitleText = subtitles[index + 1]?.[0];
     if (!nextSubtitleText) return false;
 
     const nextSubtitleMatches = textMatcher(nextSubtitleText);
@@ -28,7 +29,10 @@ export function filterVideos(videos: VideoWithSubtitles[], q: string, logger: Fa
   const filteredVideos = videos
     .map((video) => ({
       ...video,
-      subtitles: filterSubtitles(video.subtitles, textMatcher),
+      subtitles: filterSubtitles(
+        (video.transcripts[0]?.subtitles as Subtitle[]) || [],
+        textMatcher
+      ),
     }))
     .filter((video) => video.subtitles.length > 0);
   if (videos.length !== filteredVideos.length) {

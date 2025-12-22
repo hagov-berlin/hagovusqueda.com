@@ -14,7 +14,7 @@ type SubtitleProps = {
 export function SubtitleResult(props: SubtitleProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const startSeconds = Math.round(props.subtitle.startTimeMs / 1000) - 2;
+  const startSeconds = Math.round(props.subtitle[1] / 1000) - 2;
   return (
     <div
       className={`${styles.subtitleMatch} ${expanded ? styles.subtitleMatchExpanded : ""}`}
@@ -22,8 +22,8 @@ export function SubtitleResult(props: SubtitleProps) {
     >
       <div className={styles.subtitleMatchHeaderContainer}>
         <div className={styles.subtitleMatchHeader}>
-          <span className={styles.subtitleTime}>{secondsToTime(props.subtitle.startTimeMs)}</span>
-          <span className={styles.subtitleText}>{props.subtitle.text}</span>
+          <span className={styles.subtitleTime}>{secondsToTime(props.subtitle[1])}</span>
+          <span className={styles.subtitleText}>{props.subtitle[0]}</span>
         </div>
         {expanded ? null : <Button>VER</Button>}
       </div>

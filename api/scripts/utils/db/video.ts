@@ -57,9 +57,6 @@ export async function deleteVideo(youtubeId: string) {
   await prismaClient.transcript.deleteMany({
     where: { video: { youtubeId } },
   });
-  await prismaClient.subtitle.deleteMany({
-    where: { video: { youtubeId } },
-  });
   await prismaClient.youtubeVideo.deleteMany({
     where: { youtubeId },
   });

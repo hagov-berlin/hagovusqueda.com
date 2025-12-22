@@ -8,13 +8,7 @@ export type Pagination = {
   totalCount: number;
 };
 
-export type Subtitle = {
-  order: number;
-  startTimeMs: number;
-  endTimeMs: number;
-  text: string;
-  videoId: number;
-};
+export type Subtitle = [string, number, number];
 
 export type Video = {
   youtubeId: string;
@@ -23,7 +17,6 @@ export type Video = {
   durationSec: number;
   date: string;
 
-  transcript?: string;
   subtitles?: Subtitle[];
 
   channel: {

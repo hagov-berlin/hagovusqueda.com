@@ -8,7 +8,10 @@ export default function getVideosWithSubtitles(videoIds: number[]) {
       id: { in: videoIds },
     },
     include: {
-      subtitles: { orderBy: { order: "asc" }, omit: { id: true, videoId: true } },
+      transcripts: {
+        // orderBy: { quality: 'desc' },
+        take: 1,
+      },
       show: { select: { name: true, slug: true } },
       channel: { select: { name: true, slug: true, youtubeId: true } },
     },

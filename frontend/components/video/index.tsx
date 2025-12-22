@@ -20,10 +20,10 @@ export default function VideoElement(props: VideoElementProps) {
         <span>{parseDate(video.date)}</span>
       </div>
       <div className={styles.subtitlesContainer}>
-        {video.subtitles?.map((subtitle) => (
-          <div key={subtitle.order} className={styles.subtitleRow}>
-            <span className={styles.subtitleTime}>{secondsToTime(subtitle.startTimeMs)}</span>
-            <span>{subtitle.text}</span>
+        {video.subtitles?.map((subtitle, index) => (
+          <div key={index} className={styles.subtitleRow}>
+            <span className={styles.subtitleTime}>{secondsToTime(subtitle[1])}</span>
+            <span>{subtitle[0]}</span>
           </div>
         ))}
       </div>
