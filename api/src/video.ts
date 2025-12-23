@@ -29,7 +29,7 @@ const omit: Prisma.YoutubeVideoOmit = {
 };
 
 export async function videos(req: FastifyRequest) {
-  const { page, show, channel } = parseQuery(req);
+  const { page, show, channel, pageSize } = parseQuery(req);
 
   const filters: Prisma.YoutubeVideoWhereInput = {
     ignored: false,
@@ -56,7 +56,7 @@ export async function videos(req: FastifyRequest) {
         date: "desc",
       },
     })
-    .withPages({ limit: 20, page });
+    .withPages({ limit: pageSize, page });
 }
 
 export async function video(req: FastifyRequest) {

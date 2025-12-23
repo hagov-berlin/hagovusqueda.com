@@ -72,11 +72,12 @@ export async function getShow(showId: string): Promise<Show> {
   });
 }
 
-export async function getVideos(page?: number): Promise<PaginatedVideos> {
+export async function getVideos(page?: number, pageSize?: number): Promise<PaginatedVideos> {
   let params: URLSearchParams | undefined = undefined;
-  if (page) {
+  if (page || pageSize) {
     params = new URLSearchParams();
-    params.set("page", page.toString());
+    if (page) params.set("page", page.toString());
+    if (pageSize) params.set("pageSize", pageSize.toString());
   }
   return request({
     path: "/videos",

@@ -16,7 +16,6 @@ export async function getShowIds(showSlugs: string[], channelSlug: string) {
 }
 
 export function normalizeText(text: string) {
-  // TODO: merge this function with the one in the search endpoint
   text = text.replace(/[\\\[\],\.¿\?¡!\-"'%`:$€+\/@²º*\_]/g, "");
   text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return text.replace(/\s+/g, " ").toLocaleLowerCase().trim();

@@ -4,9 +4,10 @@ import { normalizeText } from "./search/utils";
 export function parseQuery(req: FastifyRequest) {
   const query = req.query as Record<string, string | undefined>;
 
-  const { q: rawQ, show: showString, channel, page: pageString } = query;
+  const { q: rawQ, show: showString, channel, page: pageString, pageSize: pageSizeString } = query;
 
   const page = pageString ? parseInt(pageString) : 1;
+  const pageSize = pageSizeString ? parseInt(pageSizeString) : 20;
 
   let show: string[] = [];
   if (showString) {
@@ -22,5 +23,5 @@ export function parseQuery(req: FastifyRequest) {
     q = normalizeText(rawQ);
   }
 
-  return { q, page, show, channel };
+  return { q, page, pageSize, show, channel };
 }
