@@ -5,7 +5,7 @@
 0       13      *       *         *         PLAYLIST_CRONJOB_FETCH_LIMIT=10000 npm run --prefix /app fetch-youtube-playlists >> "/app/scripts/fetch-youtube-playlists-$(date -I).log" 2>&1
 
 # Subtitles cronjobs
-30      *       *       *         *         npm run --prefix /app fetch-youtube-subtitles >> "/app/scripts/fetch-youtube-subtitles-$(date -I).log" 2>&1
+10      */2       *       *         *         npm run --prefix /app fetch-youtube-subtitles >> "/app/scripts/fetch-youtube-subtitles-$(date -I).log" 2>&1
 
 # System cronjobs
 30       *      *       *         *         apk -U upgrade yt-dlp >> /app/scripts/update-yt-dlp.log 2>&1
