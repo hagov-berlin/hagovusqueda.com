@@ -40,3 +40,6 @@ export default async function VideoOrPaginatedVideos({ params }: PageProps) {
   const videoId = slug.slice(-11);
   return <Video videoId={videoId} slug={slug} />;
 }
+
+export const dynamic = "force-static";
+export const revalidate = 86400; // One day

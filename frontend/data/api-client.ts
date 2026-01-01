@@ -24,7 +24,7 @@ async function request<T>(options: RequestOptions): Promise<T> {
   const url = options.params
     ? `${baseUrl}${options.path}?${options.params.toString()}`
     : `${baseUrl}${options.path}`;
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, { next: { revalidate: 3600 } });
   if (response.status != 200) {
     throw new Error(await response.text());
   }

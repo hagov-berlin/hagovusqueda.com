@@ -20,7 +20,7 @@ cp .env.example .env
 nano .env
 
 # Run the compose daemon
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## Deployment
@@ -38,14 +38,14 @@ docker compose down
 docker compose up --build -d
 
 # Run db migrations
-docker-compose exec api npx prisma migrate deploy
+docker compose exec api npx prisma migrate deploy
 ```
 
 ## DB dump and restore
 
 ```sh
 # Get into your running docker db via
-docker-compose exec db bash
+docker compose exec db bash
 
 # Generate a dump
 pg_dump -U postgres -h localhost -p 5432 --no-owner --no-privileges -Fc -d appdb > /dump_local.backup
@@ -58,7 +58,7 @@ scp dump_local.backup root@hagovusqueda:/root/
 
 # SSH into dropplet
 # Update the codebase/migrate if needed (see deployment section)
-docker-compose exec db dropdb -f --username=postgres_hagov_db_user hagovusqueda
-docker-compose exec db createdb --username=postgres_hagov_db_user hagovusqueda
-cat dump_local.backup | docker exec -i <container_id> pg_restore -U postgres_hagov_db_user -d hagovusqueda --no-owner
+docker compose exec db dropdb -f --username=postgres_hagov_db_user hagovusqueda
+docker compose exec db createdb --username=postgres_hagov_db_user hagovusqueda
+cat ../dump_local.backup | docker exec -i <container_id> pg_restore -U postgres_hagov_db_user -d hagovusqueda --no-owner
 ```
