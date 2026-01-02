@@ -1,4 +1,4 @@
-import { PaginatedSearchResults, SearchOptions, Show, Video } from "@/data/types";
+import { PaginatedSearchResults, SearchOptions, Show } from "@/data/types";
 
 export function getTitle(
   searchOptions: SearchOptions,
