@@ -1,6 +1,7 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
 
   @media (max-width: 628px) {
@@ -12,20 +13,4 @@
   color: inherit;
   font-weight: bold;
   text-decoration: none;
-}
-
-.logo {
-  aspect-ratio: 5;
-  background-image: url("/logo.png");
-  width: 100%;
-  max-width: 250px;
-  background-size: 130%;
-  background-position: center;
-  margin-right: auto;
-
-  @media (max-width: 328px) {
-    background-image: url("/logo-small.png");
-    aspect-ratio: 0.7;
-    width: 30px;
-  }
 }

@@ -1,10 +1,9 @@
 import Container from "../container";
-import styles from "./faqs.module.css";
 
 export default function FAQs() {
   return (
     <Container>
-      <ul className={styles.faqs}>
+      <ul>
         <li>
           <h3>¿Cómo funciona la búsqueda?</h3>
           <p>
